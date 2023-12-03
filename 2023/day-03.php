@@ -59,8 +59,8 @@ class Day03 {
 	 * @return int The sum of gear number products.
 	 */
 	public function part_2(): int {
-		$total                = 0;
-		$gear_related_numbers = [];
+		$total = 0;
+		$gears = [];
 
 		// Clean the schematic so it's just the gear symbol.
 		$cleaned_schematic = array_map( function ( $line ) {
@@ -81,7 +81,7 @@ class Day03 {
 
 					$gear_position = $this->find_adjacent_gear( $cleaned_schematic, $row_index, $col_index, $next_index - 1 );
 					if ( $gear_position ) {
-						$gear_related_numbers[ $gear_position ][] = (int) $number;
+						$gears[ $gear_position ][] = (int) $number;
 					}
 
 					$col_index = $next_index - 1;
@@ -90,7 +90,7 @@ class Day03 {
 		}
 
 		// Calculate the sum of gear number products.
-		foreach ( $gear_related_numbers as $numbers ) {
+		foreach ( $gears as $numbers ) {
 			if ( count( $numbers ) === 2 ) {
 				$total += $numbers[0] * $numbers[1];
 			}
