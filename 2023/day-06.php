@@ -52,8 +52,7 @@ class Day06 {
 
 		// Iterate up to the midpoint of the total race time
 		for ( $hold = 0; $hold <= intdiv( $time, 2 ); $hold ++ ) {
-			$distance = $hold * ( $time - $hold );
-			if ( $distance > $record ) {
+			if ( $hold * ( $time - $hold ) > $record ) {
 				$ways ++;
 			}
 		}
