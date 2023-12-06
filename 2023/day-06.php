@@ -58,19 +58,9 @@ class Day06 {
 			}
 		}
 
-		// Double the count for the symmetric second half of the bell curve
-		$ways *= 2;
-
-		// Adjusting for the even time scenario
-		if ( $time % 2 === 0 ) {
-			$midpoint_distance = ( $time / 2 ) * ( $time / 2 );
-			if ( $midpoint_distance > $record ) {
-				// Subtract 1 if the midpoint distance beats the record
-				$ways --;
-			}
-		}
-
-		return $ways;
+		// Double the count for the second half of the bell curve
+		// adjust for even time by subtracting 1 if necessary
+		return $time % 2 === 0 ? $ways * 2 - 1 : $ways * 2;
 	}
 
 	/**
