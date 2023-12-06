@@ -47,21 +47,23 @@ class Day06 {
 	 *
 	 * @return int The number of ways to win the race.
 	 */
-	private function calculate_ways_to_win( int $time, int $record ): int {
-		$ways = 0;
+	private function calculate_ways_to_win(int $time, int $record): int {
+		$first_winner = null;
 
-		// Start from the midpoint and go down
-		for ( $hold = intdiv( $time, 2 ); $hold >= 0; $hold -- ) {
-			// If the distance doesn't beat the record, break out of the loop
-			if ( $hold * ( $time - $hold ) <= $record ) {
+		// Iterate from start to find the first hold time that beats the record
+		for ( $hold = 0; $hold <= intdiv( $time, 2 ); $hold ++ ) {
+			if ( $hold * ( $time - $hold ) > $record ) {
+				$first_winner = $hold;
 				break;
 			}
-
-			$ways ++;
 		}
 
-		return $ways * 2 - ( $time % 2 === 0 ? 1 : 0 );
+		// Calculate total ways using the bell curve
+		$winners = intdiv( $time, 2 ) - $first_winner + 1;
+
+		return $time % 2 === 0 ? $winners * 2 - 1 : $winners * 2;
 	}
+
 
 	/**
 	 * Parses the puzzle data from a file.
