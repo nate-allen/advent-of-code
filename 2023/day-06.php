@@ -50,16 +50,17 @@ class Day06 {
 	private function calculate_ways_to_win( int $time, int $record ): int {
 		$ways = 0;
 
-		// Iterate up to the midpoint of the total race time
-		for ( $hold = 0; $hold <= intdiv( $time, 2 ); $hold ++ ) {
-			if ( $hold * ( $time - $hold ) > $record ) {
-				$ways ++;
+		// Start from the midpoint and go down
+		for ( $hold = intdiv( $time, 2 ); $hold >= 0; $hold -- ) {
+			// If the distance doesn't beat the record, break out of the loop
+			if ( $hold * ( $time - $hold ) <= $record ) {
+				break;
 			}
+
+			$ways ++;
 		}
 
-		// Double the count for the second half of the bell curve
-		// adjust for even time by subtracting 1 if necessary
-		return $time % 2 === 0 ? $ways * 2 - 1 : $ways * 2;
+		return $ways * 2 - ( $time % 2 === 0 ? 1 : 0 );
 	}
 
 	/**
