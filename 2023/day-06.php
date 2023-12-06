@@ -23,11 +23,8 @@ class Day06 {
 	public function part_1(): int {
 		$total_ways = 1;
 
-		foreach ($this->data['time'] as $index => $time) {
-			$record_distance = $this->data['distance'][$index];
-			$ways_to_win = $this->calculate_ways_to_win($time, $record_distance);
-
-			$total_ways *= $ways_to_win;
+		foreach ( $this->data['time'] as $index => $time ) {
+			$total_ways *= $this->calculate_ways_to_win( $time, $this->data['distance'][ $index ] );
 		}
 
 		return $total_ways;
@@ -53,10 +50,23 @@ class Day06 {
 	private function calculate_ways_to_win( int $time, int $record ): int {
 		$ways = 0;
 
-		for ( $hold = 0; $hold <= $time; $hold ++ ) {
+		// Iterate up to the midpoint of the total race time
+		for ( $hold = 0; $hold <= intdiv( $time, 2 ); $hold ++ ) {
 			$distance = $hold * ( $time - $hold );
 			if ( $distance > $record ) {
 				$ways ++;
+			}
+		}
+
+		// Double the count for the symmetric second half of the bell curve
+		$ways *= 2;
+
+		// Adjusting for the even time scenario
+		if ( $time % 2 === 0 ) {
+			$midpoint_distance = ( $time / 2 ) * ( $time / 2 );
+			if ( $midpoint_distance > $record ) {
+				// Subtract 1 if the midpoint distance beats the record
+				$ways --;
 			}
 		}
 
