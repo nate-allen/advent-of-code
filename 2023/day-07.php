@@ -6,17 +6,14 @@
 class Day07 {
 	private array $data;
 
-	private string $card_values = '23456789TJQKA';
+	private string $card_values;
 
 	private int $part;
 
 	public function __construct( $part, $test ) {
 		$this->parse_data( $test, $part );
-		$this->part = $part;
-
-		if ( 2 === $part ) {
-			$this->card_values = 'J23456789TQKA';
-		}
+		$this->part        = $part;
+		$this->card_values = $part === 2 ? 'J23456789TQKA' : '23456789TJQKA';
 	}
 
 	/**
