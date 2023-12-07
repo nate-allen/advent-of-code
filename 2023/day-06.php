@@ -64,7 +64,6 @@ class Day06 {
 		return $time % 2 === 0 ? $winners * 2 - 1 : $winners * 2;
 	}
 
-
 	/**
 	 * Parses the puzzle data from a file.
 	 *
