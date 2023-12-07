@@ -6,8 +6,17 @@
 class Day07 {
 	private array $data;
 
+	private string $card_values = '23456789TJQKA';
+
+	private int $part;
+
 	public function __construct( $part, $test ) {
 		$this->parse_data( $test, $part );
+		$this->part = $part;
+
+		if ( 2 === $part ) {
+			$this->card_values = 'J23456789TQKA';
+		}
 	}
 
 	/**
@@ -17,7 +26,6 @@ class Day07 {
 	 */
 	public function part_1(): int {
 		usort( $this->data, [ $this, 'compare_hands' ] );
-		//print_r( $this->data );
 
 		return $this->calculate_winnings();
 	}
@@ -28,7 +36,9 @@ class Day07 {
 	 * @return int The total winnings.
 	 */
 	public function part_2(): int {
-		return 0;
+		usort( $this->data, [ $this, 'compare_hands' ] );
+
+		return $this->calculate_winnings();
 	}
 
 	/**
@@ -45,12 +55,67 @@ class Day07 {
 
 		// Count the occurrences of each card
 		$counts = array_count_values( $cards );
-		arsort( $counts );
+
+		if ( 2 === $this->part ) {
+			$joker_count = $counts['J'] ?? 0;
+			unset( $counts['J'] );
+
+			// If there are Jokers, use them to form the strongest hand
+			if ( $joker_count > 0 ) {
+				$this->apply_jokers( $counts, $joker_count );
+			}
+		}
 
 		// Determine the hand type based on the counts
 		$hand_type = $this->determine_hand_type( $counts );
 
 		return [ 'type' => $hand_type, 'cards' => $cards, 'bid' => (int) $bid ];
+	}
+
+	/**
+	 * Applies Jokers to the hand to form the strongest hand possible.
+	 *
+	 * @param array $counts     The counts of each card.
+	 * @param int   $joker_count The number of Jokers.
+	 */
+	private function apply_jokers( array &$counts, int $joker_count ): void {
+		// Edge case: If all cards are Jokers
+		if ( $joker_count == 5 ) {
+			$counts['J'] = 5; // Set Jokers as five of a kind
+
+			return;
+		}
+
+		// Find the card with the highest count
+		$highest_card_count = max( $counts );
+
+		// If we can use Jokers to create five of a kind, do it
+		if ( $joker_count + $highest_card_count >= 5 ) {
+			$key            = array_search( $highest_card_count, $counts ); // Get the card with the highest count
+			$counts[ $key ] = 5;
+
+			return;
+		}
+
+		// Use Jokers to upgrade existing pairs, three-of-a-kinds, or quads
+		arsort( $counts ); // Sort by frequency and value
+		foreach ( $counts as $card => $count ) {
+			while ( $joker_count > 0 && $count < 4 ) {
+				$counts[ $card ] ++;
+				$joker_count --;
+			}
+
+			if ( $joker_count === 0 ) {
+				break;
+			}
+		}
+
+		// If Jokers are still left, use them to create pairs
+		if ( $joker_count > 0 ) {
+			if ( count( $counts ) + $joker_count <= 5 ) {
+				$counts['J'] = min( 2, $joker_count );
+			}
+		}
 	}
 
 	/**
@@ -119,7 +184,8 @@ class Day07 {
 	 * @return int
 	 */
 	private function card_value( string $card ): int {
-		return strpos( '23456789TJQKA', $card );
+		$value = strpos( $this->card_values, $card );
+		return $value;
 	}
 
 	/**
@@ -191,5 +257,15 @@ function part_2( $test = false ) {
 	$end    = microtime( true );
 
 	printf( 'Total: %s' . PHP_EOL, $result );
+
+	if ( $test ) {
+		$expected = 5905;
+		printf( 'Expected: %s' . PHP_EOL, $expected );
+		if ( $result === $expected ) {
+			echo 'SUCCESS!' . PHP_EOL;
+		} else {
+			echo 'FAILURE!' . PHP_EOL;
+		}
+	}
 	printf( 'Time: %s seconds' . PHP_EOL, round( $end - $start, 4 ) );
 }
