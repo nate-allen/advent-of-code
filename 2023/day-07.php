@@ -31,7 +31,7 @@ class Day07 {
 	}
 
 	/**
-	 * Part 2: J's are now wild. What are the total winnings?
+	 * Part 2: J's are now wild, but also worth the least amount. What are the total winnings?
 	 *
 	 * @return int The total winnings.
 	 */
@@ -184,8 +184,7 @@ class Day07 {
 	 * @return int
 	 */
 	private function card_value( string $card ): int {
-		$value = strpos( $this->card_values, $card );
-		return $value;
+		return strpos( $this->card_values, $card );
 	}
 
 	/**
