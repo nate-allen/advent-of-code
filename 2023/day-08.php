@@ -61,7 +61,13 @@ class Day08 {
 			$steps_per_path[] = $this->steps_to_reach_z( $start_node, $node_map, $instructions );
 		}
 
-		return $this->lcm_array( $steps_per_path );
+		$lcm = gmp_init( 1 );
+
+		foreach ( $steps_per_path as $step ) {
+			$lcm = gmp_lcm( $lcm, gmp_init( $step ) );
+		}
+
+		return gmp_intval( $lcm );
 	}
 
 	/**
@@ -106,50 +112,6 @@ class Day08 {
 		}
 
 		return $steps;
-	}
-
-	/**
-	 * Calculates the least common multiple (LCM) of an array of numbers.
-	 *
-	 * @param array $numbers The array of numbers.
-	 *
-	 * @return int The LCM of the given numbers.
-	 */
-	private function lcm_array( array $numbers ): int {
-		$lcm = 1;
-		foreach ( $numbers as $number ) {
-			$lcm = $this->lcm( $lcm, $number );
-		}
-
-		return $lcm;
-	}
-
-	/**
-	 * Calculates the least common multiple (LCM) of two numbers.
-	 *
-	 * @param int $a The first number.
-	 * @param int $b The second number.
-	 *
-	 * @return int The LCM of the two numbers.
-	 */
-	private function lcm( int $a, int $b ): int {
-		return ( $a * $b ) / $this->gcd( $a, $b );
-	}
-
-	/**
-	 * Calculates the greatest common divisor (GCD) of two numbers.
-	 *
-	 * @param int $a The first number.
-	 * @param int $b The second number.
-	 *
-	 * @return int The GCD of the two numbers.
-	 */
-	private function gcd( int $a, int $b ): int {
-		if ( $b == 0 ) {
-			return $a;
-		}
-
-		return $this->gcd( $b, $a % $b );
 	}
 
 	/**
