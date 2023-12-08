@@ -61,10 +61,10 @@ class Day08 {
 			$steps_per_path[] = $this->steps_to_reach_z( $start_node, $node_map, $instructions );
 		}
 
-		$lcm = gmp_init( 1 );
+		$lcm = 1;
 
 		foreach ( $steps_per_path as $step ) {
-			$lcm = gmp_lcm( $lcm, gmp_init( $step ) );
+			$lcm = gmp_lcm( $lcm, $step );
 		}
 
 		return gmp_intval( $lcm );
