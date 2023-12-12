@@ -48,10 +48,7 @@ class Day12 {
 
 			[ $springs, $group_sizes ] = explode( ' ', $line );
 			$group_sizes = explode( ',', $group_sizes );
-
-			// Calculate arrangements for the unfolded line
-			$result = $this->find_possible_combinations( $springs, $group_sizes, [ 0, 0, 0 ] );
-			$sum    += $result;
+			$sum += $this->find_possible_combinations( $springs, $group_sizes, [ 0, 0, 0 ] );
 		}
 
 		return $sum;
