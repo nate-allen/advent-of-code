@@ -13,6 +13,25 @@ class Day14 {
 	private array $grid;
 
 	/**
+	 * The states of the grid after each cycle.
+	 *
+	 * @var array
+	 */
+	private array $states = [];
+
+	/**
+	 * The directions to tilt the platform.
+	 *
+	 * @var array
+	 */
+	private array $directions = ['north', 'west', 'south', 'east'];
+
+	/**
+	 * The number of cycles to run for part 2.
+	 */
+	private int $cycles = 1_000_000_000;
+
+	/**
 	 * Constructor to parse the data.
 	 *
 	 * @param string $test Flag to use test data.
@@ -28,11 +47,10 @@ class Day14 {
 	 * @return int The total load.
 	 */
 	public function part_1(): int {
-		$this->tilt_north();
+		$this->tilt( $this->directions[0] );
 
 		return $this->calculate_load();
 	}
-
 
 	/**
 	 * Part 2: Run the spin cycle for 1000000000 cycles, then calculate the total load on the north support beams.
@@ -40,39 +58,150 @@ class Day14 {
 	 * @return int The total load.
 	 */
 	public function part_2(): int {
-		return 0;
+		$remaining_cycles = $this->cycles;
+		$cycle_found      = false;
+
+		for ( $i = 0; $i < $this->cycles; $i ++ ) {
+			$this->perform_spin_cycle();
+			$state = $this->serialize_grid();
+
+			if ( isset( $this->states[ $state ] ) ) {
+				// Calculate the length of the cycle
+				$cycle_length = $i - $this->states[ $state ];
+				// Calculate remaining cycles after detecting the cycle
+				$remaining_cycles = ( $this->cycles - $i - 1 ) % $cycle_length;
+				$cycle_found      = true;
+				break;
+			}
+
+			$this->states[ $state ] = $i;
+		}
+
+		if ( $cycle_found ) {
+			// Only perform the remaining cycles after the cycle is detected
+			for ( $i = 0; $i < $remaining_cycles; $i ++ ) {
+				$this->perform_spin_cycle();
+			}
+		}
+
+		return $this->calculate_load();
 	}
 
 	/**
-	 * Tilts the platform north, causing rounded rocks to move up.
+	 * Tilts the platform in the specified direction, causing rounded rocks to move.
+	 *
+	 * @param string $direction The direction to tilt ('north', 'south', 'east', 'west')
 	 */
-	private function tilt_north(): void {
-		// Loop over each row in the grid, starting from the top
-		for ( $y = 0; $y < count( $this->grid ); $y ++ ) {
-			// Loop over each column in the current row
-			for ( $x = 0; $x < count( $this->grid[ $y ] ); $x ++ ) {
-				// Check if the current cell contains a rounded rock
-				if ( 'O' === $this->grid[ $y ][ $x ] ) {
-					// If a rock is found, scan upwards in the same column
-					for ( $i = $y - 1; $i >= 0; $i -- ) {
-						// Check for an obstacle, like another rock 'O' or a '#'
-						if ( '#' === $this->grid[ $i ][ $x ] || 'O' === $this->grid[ $i ][ $x ] ) {
-							// Move the rock to the position just below the obstacle
-							$this->grid[ $y ][ $x ]     = '.'; // Clear the original position of the rock
-							$this->grid[ $i + 1 ][ $x ] = 'O'; // Place the rock below the obstacle
-							break; // Stop scanning
-						}
+	private function tilt( string $direction ): void {
+		$height = count($this->grid);
+		$width = count($this->grid[0]);
 
-						// If the top row is reached and no obstacle is found
-						if ( 0 === $i ) {
-							// Move the rock to the top row
-							$this->grid[ $y ][ $x ] = '.'; // Clear the original position of the rock
-							$this->grid[0][ $x ]    = 'O'; // Place the rock at the top row
-							break; // Stop scanning
-						}
+		switch ($direction) {
+			case 'west':
+			case 'north':
+				for ($y = 0; $y < $height; $y++) {
+					for ($x = 0; $x < $width; $x++) {
+						$this->move_rock($x, $y, $direction);
 					}
 				}
-			}
+				break;
+
+			case 'south':
+				for ($y = $height - 1; $y >= 0; $y--) {
+					for ($x = 0; $x < $width; $x++) {
+						$this->move_rock($x, $y, $direction);
+					}
+				}
+				break;
+
+			case 'east':
+				for ($y = 0; $y < $height; $y++) {
+					for ($x = $width - 1; $x >= 0; $x--) {
+						$this->move_rock($x, $y, $direction);
+					}
+				}
+				break;
+
+			default:
+				die( 'How did you even get here lol' );
+		}
+	}
+
+	/**
+	 * Moves a rock based in the direction.
+	 *
+	 * @param int    $x         The x-coordinate of the rock
+	 * @param int    $y         The y-coordinate of the rock
+	 * @param string $direction The direction to move
+	 */
+	private function move_rock( int $x, int $y, string $direction ): void {
+		if ( 'O' !== $this->grid[ $y ][ $x ] ) {
+			return;
+		}
+
+		$height = count( $this->grid );
+		$width  = count( $this->grid[0] );
+
+		switch ( $direction ) {
+			case 'north':
+				for ( $i = $y - 1; $i >= 0; $i -- ) {
+					if ( '#' === $this->grid[ $i ][ $x ] || 'O' === $this->grid[ $i ][ $x ] ) {
+						$this->grid[ $y ][ $x ]     = '.';
+						$this->grid[ $i + 1 ][ $x ] = 'O';
+						break;
+					}
+
+					if ( 0 === $i ) {
+						$this->grid[ $y ][ $x ] = '.';
+						$this->grid[0][ $x ]    = 'O';
+					}
+				}
+				break;
+
+			case 'south':
+				for ( $i = $y + 1; $i < $height; $i ++ ) {
+					if ( '#' === $this->grid[ $i ][ $x ] || 'O' === $this->grid[ $i ][ $x ] ) {
+						$this->grid[ $y ][ $x ]     = '.';
+						$this->grid[ $i - 1 ][ $x ] = 'O';
+						break;
+					}
+
+					if ( $i === $height - 1 ) {
+						$this->grid[ $y ][ $x ]          = '.';
+						$this->grid[ $height - 1 ][ $x ] = 'O';
+					}
+				}
+				break;
+
+			case 'east':
+				for ( $i = $x + 1; $i < $width; $i ++ ) {
+					if ( '#' === $this->grid[ $y ][ $i ] || 'O' === $this->grid[ $y ][ $i ] ) {
+						$this->grid[ $y ][ $x ]     = '.';
+						$this->grid[ $y ][ $i - 1 ] = 'O';
+						break;
+					}
+
+					if ( $i === $width - 1 ) {
+						$this->grid[ $y ][ $x ]         = '.';
+						$this->grid[ $y ][ $width - 1 ] = 'O';
+					}
+				}
+				break;
+
+			case 'west':
+				for ( $i = $x - 1; $i >= 0; $i -- ) {
+					if ( '#' === $this->grid[ $y ][ $i ] || 'O' === $this->grid[ $y ][ $i ] ) {
+						$this->grid[ $y ][ $x ]     = '.';
+						$this->grid[ $y ][ $i + 1 ] = 'O';
+						break;
+					}
+
+					if ( 0 === $i ) {
+						$this->grid[ $y ][ $x ] = '.';
+						$this->grid[ $y ][0]    = 'O';
+					}
+				}
+				break;
 		}
 	}
 
@@ -83,14 +212,28 @@ class Day14 {
 	 */
 	private function calculate_load(): int {
 		$sum = 0;
-		for ($y = count($this->grid) - 1; $y >= 0; $y--) {
-			for ($x = 0; $x < count($this->grid[$y]); $x++) {
-				if ($this->grid[$y][$x] === 'O') {
-					$sum += (count($this->grid) - $y);
+		for ( $y = count( $this->grid ) - 1; $y >= 0; $y -- ) {
+			for ( $x = 0; $x < count( $this->grid[ $y ] ); $x ++ ) {
+				if ( $this->grid[ $y ][ $x ] === 'O' ) {
+					$sum += ( count( $this->grid ) - $y );
 				}
 			}
 		}
+
 		return $sum;
+	}
+
+	/**
+	 * Performs one cycle by tilting north, west, south, and east.
+	 */
+	public function perform_spin_cycle(): void {
+		foreach ( $this->directions as $direction ) {
+			$this->tilt( $direction );
+		}
+	}
+
+	private function serialize_grid(): string {
+		return implode("\n", array_map(fn($row) => implode('', $row), $this->grid));
 	}
 
 	/**
@@ -142,7 +285,7 @@ function part_2( $test = false ) {
 	$day14    = new Day14( $test, 2 );
 	$result   = $day14->part_2();
 	$end      = microtime( true );
-	$expected = $test ? 64 : 0;
+	$expected = $test ? 64 : 93102;
 
 	printf( 'Total:    %s' . PHP_EOL, $result );
 	printf( 'Expected: %s' . PHP_EOL, $expected );
