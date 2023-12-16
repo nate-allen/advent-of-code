@@ -5,25 +5,21 @@
  */
 class Day16 {
 	/**
+	 *  Movement directions.
+	 *
+	 * @var array
+	 */
+	const RIGHT = [ 0, 1 ];
+	const DOWN  = [ 1, 0 ];
+	const LEFT  = [ 0, -1 ];
+	const UP    = [ -1, 0 ];
+
+	/**
 	 * The puzzle data.
 	 *
 	 * @var array
 	 */
 	private array $data;
-
-	/**
-	 * Movement directions for the beam.
-	 *
-	 * @var array|array[]
-	 */
-	private array $movement = [
-		'right' => [ 0, 1 ],
-		'down'  => [ 1, 0 ],
-		'left'  => [ 0, -1 ],
-		'up'    => [ -1, 0 ]
-	];
-
-	private array $cache = [];
 
 	public function __construct(string $test, int $part) {
 		$this->parse_data($test, $part);
@@ -35,7 +31,7 @@ class Day16 {
 	 * @return int The number of energized tiles.
 	 */
 	public function part_1(): int {
-		return $this->count_energized( $this->data, [ 0, - 1, $this->movement['right'] ] );
+		return $this->count_energized( $this->data, [ 0, - 1, self::RIGHT ] );
 	}
 
 	/**
@@ -50,13 +46,13 @@ class Day16 {
 		$max  = 0;
 
 		for ($i = 0; $i < $rows; $i++) {
-			$max = max( $max, $this->count_energized( $grid, [ $i, -1, $this->movement[ 'right' ] ] ) );
-			$max = max( $max, $this->count_energized( $grid, [ $i, $cols, $this->movement[ 'left' ] ] ) );
+			$max = max( $max, $this->count_energized( $grid, [ $i, -1, self::RIGHT ] ) );
+			$max = max( $max, $this->count_energized( $grid, [ $i, $cols, self::LEFT ] ) );
 		}
 
 		for ($j = 0; $j < $cols; $j++) {
-			$max = max( $max, $this->count_energized( $grid, [ -1, $j, $this->movement['down'] ] ) );
-			$max = max( $max, $this->count_energized( $grid, [ $rows, $j, $this->movement['up'] ] ) );
+			$max = max( $max, $this->count_energized( $grid, [ -1, $j, self::DOWN ] ) );
+			$max = max( $max, $this->count_energized( $grid, [ $rows, $j, self::UP ] ) );
 		}
 
 		return $max;
@@ -77,6 +73,7 @@ class Day16 {
 			[ $x, $y, $direction ] = array_shift( $queue );
 			$key = $x . ',' . $y . ',' . implode( ',', $direction );
 
+			// Skip if we've already seen this position and direction.
 			if ( isset( $seen[ $key ] ) ) {
 				continue;
 			}
@@ -94,12 +91,10 @@ class Day16 {
 				continue;
 			}
 
-			$char    = $grid[ $new_x ][ $new_y ];
-			$updates = $this->get_updates( $char, $direction );
+			$updates = $this->get_updates( $grid[ $new_x ][ $new_y ], $direction );
 
 			foreach ( $updates as $new_direction ) {
-				$newPos  = [ $new_x, $new_y, $new_direction ];
-				$queue[] = $newPos;
+				$queue[] = [ $new_x, $new_y, $new_direction ];;
 			}
 		}
 	}
@@ -120,19 +115,19 @@ class Day16 {
 				$updates[] = $direction;
 				break;
 			case '|':
-				if ( $direction === $this->movement['down'] || $direction === $this->movement['up'] ) {
+				if ( $direction === self::DOWN || $direction === self::UP ) {
 					$updates[] = $direction;
 				} else {
-					$updates[] = $this->movement['down'];
-					$updates[] = $this->movement['up'];
+					$updates[] = self::DOWN;
+					$updates[] = self::UP;
 				}
 				break;
 			case '-':
-				if ( $direction === $this->movement['left'] || $direction === $this->movement['right'] ) {
+				if ( $direction === self::LEFT || $direction === self::RIGHT ) {
 					$updates[] = $direction;
 				} else {
-					$updates[] = $this->movement['left'];
-					$updates[] = $this->movement['right'];
+					$updates[] = self::LEFT;
+					$updates[] = self::RIGHT;
 				}
 				break;
 			case '\\':
@@ -156,24 +151,24 @@ class Day16 {
 	 */
 	private function get_reflection( array $direction, string $mirror ): array {
 		if ( $mirror === '\\' ) {
-			if ( $direction === $this->movement['down'] ) {
-				return $this->movement['right'];
-			} elseif ( $direction === $this->movement['left'] ) {
-				return $this->movement['up'];
-			} elseif ( $direction === $this->movement['up'] ) {
-				return $this->movement['left'];
+			if ( $direction === self::DOWN ) {
+				return self::RIGHT;
+			} elseif ( $direction === self::LEFT ) {
+				return self::UP;
+			} elseif ( $direction === self::UP ) {
+				return self::LEFT;
 			} else {
-				return $this->movement['down'];
+				return self::DOWN;
 			}
 		} elseif ( $mirror === '/' ) {
-			if ( $direction === $this->movement['down'] ) {
-				return $this->movement['left'];
-			} elseif ( $direction === $this->movement['left'] ) {
-				return $this->movement['down'];
-			} elseif ( $direction === $this->movement['up'] ) {
-				return $this->movement['right'];
+			if ( $direction === self::DOWN ) {
+				return self::LEFT;
+			} elseif ( $direction === self::LEFT ) {
+				return self::DOWN;
+			} elseif ( $direction === self::UP ) {
+				return self::RIGHT;
 			} else {
-				return $this->movement['up'];
+				return self::UP;
 			}
 		} else {
 			die( 'Not a valid mirror type dude' );
