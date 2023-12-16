@@ -23,6 +23,8 @@ class Day16 {
 		'up'    => [ -1, 0 ]
 	];
 
+	private array $cache = [];
+
 	public function __construct(string $test, int $part) {
 		$this->parse_data($test, $part);
 	}
@@ -68,11 +70,18 @@ class Day16 {
 	 * @param array &$matrix The matrix to track energized tiles.
 	 */
 	private function trace_beam_path( array $grid, array $value, array &$matrix ): void {
-		$seen  = [ $value ];
+		$seen  = [];
 		$queue = [ $value ];
 
 		while ( ! empty( $queue ) ) {
 			[ $x, $y, $direction ] = array_shift( $queue );
+			$key = $x . ',' . $y . ',' . implode( ',', $direction );
+
+			if ( isset( $seen[ $key ] ) ) {
+				continue;
+			}
+
+			$seen[ $key ] = true;
 
 			if ( $x >= 0 && $y >= 0 && $x < count( $grid ) && $y < strlen( $grid[ $x ] ) ) {
 				$matrix[ $x ][ $y ] ++;
@@ -89,12 +98,8 @@ class Day16 {
 			$updates = $this->get_updates( $char, $direction );
 
 			foreach ( $updates as $new_direction ) {
-				$newPos = [ $new_x, $new_y, $new_direction ];
-
-				if ( ! in_array( $newPos, $seen, true ) ) {
-					$seen[]  = $newPos;
-					$queue[] = $newPos;
-				}
+				$newPos  = [ $new_x, $new_y, $new_direction ];
+				$queue[] = $newPos;
 			}
 		}
 	}
@@ -246,7 +251,7 @@ function part_2( $test = false ) {
 	$day16    = new Day16( $test, 2 );
 	$result   = $day16->part_2();
 	$end      = microtime( true );
-	$expected = $test ? 51 : 0;
+	$expected = $test ? 51 : 8231;
 
 	printf( 'Total:    %s' . PHP_EOL, $result );
 	printf( 'Expected: %s' . PHP_EOL, $expected );
