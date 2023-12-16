@@ -11,7 +11,14 @@ class Day10 {
 	 */
 	private string $data;
 
-	private int $columns = 0;
+	/**
+	 * Lines of the puzzle data.
+	 *
+	 * @var array
+	 */
+	private array $lines;
+
+	private int $columns;
 
 	/**
 	 * The grid representation of the puzzle data.
@@ -85,7 +92,71 @@ class Day10 {
 	 * @return int The answer.
 	 */
 	public function part_2(): int {
-		return 0;
+		$start = [ 0, 0 ];
+
+		foreach ( $this->lines as $index => $line ) {
+			$pos = strpos( $line, 'S' );
+
+			if ( false !== $pos ) {
+				$start = [ $pos, $index ];
+				break;
+			}
+		}
+
+		$directions_to_check = [
+			[ 1, 0 ],
+			[ 0, 1 ],
+			[ -1, 0 ],
+			[ 0, -1 ]
+		];
+
+		foreach ( $directions_to_check as $direction ) {
+			$x_direction      = $direction[0];
+			$y_direction      = $direction[1];
+			$current_position = $start;
+			$loop_positions   = [ $start ];
+			$loop_found       = false;
+
+			while ( true ) {
+				$current_position = [ $current_position[0] + $x_direction, $current_position[1] + $y_direction ];
+
+				if ( $current_position === $start ) {
+					$loop_found = true;
+					break;
+				}
+
+				$loop_positions[] = $current_position;
+
+				$x = $current_position[0];
+				$y = $current_position[1];
+
+				if ( $this->is_out_of_bounds( $x, $y ) || $this->is_ground( $x, $y ) ) {
+					break;
+				}
+
+				$new_directions = $this->get_new_direction( $x, $y, $x_direction, $y_direction );
+
+				if ( false === $new_directions ) {
+					break;
+				}
+
+				$x_direction = $new_directions[0];
+				$y_direction = $new_directions[1];
+			}
+
+			if ( $loop_found ) {
+				break;
+			}
+		}
+
+		$sum = 0;
+		foreach ( $loop_positions as $index => $pos ) {
+			$next_position = $loop_positions[ ( $index + 1 ) % count( $loop_positions ) ];
+
+			$sum += $pos[0] * $next_position[1] - $pos[1] * $next_position[0];
+		}
+
+		return abs( $sum / 2 ) - count( $loop_positions ) / 2 + 1;
 	}
 
 	/**
@@ -123,6 +194,50 @@ class Day10 {
 		return null;
 	}
 
+	function is_out_of_bounds( $x, $y ): bool {
+		return $x < 0 || $y < 0 || $x >= strlen( $this->lines[0] ) || $y >= count( $this->lines );
+	}
+
+	function is_ground( $x, $y ): bool {
+		return $this->lines[ $y ][ $x ] === '.';
+	}
+
+	function get_new_direction($x, $y, $direction_x, $direction_y): array|bool {
+		$current = $this->lines[$y][$x];
+
+		if ( '-' === $current && 0 !== $direction_x && 0 === $direction_y ) {
+			return [ $direction_x, $direction_y ];
+		} elseif ( '|' === $current && 0 !== $direction_y && 0 === $direction_x ) {
+			return [ $direction_x, $direction_y ];
+		} elseif ( $current === 'L' ) {
+			if ( 0 === $direction_x && 1 === $direction_y ) {
+				return [ 1, 0 ];
+			} elseif ( -1 === $direction_x && 0 === $direction_y ) {
+				return [ 0, - 1 ];
+			}
+		} elseif ( $current === 'J' ) {
+			if ( 0 === $direction_x && 1 === $direction_y ) {
+				return [ - 1, 0 ];
+			} elseif ( 1 === $direction_x && 0 === $direction_y ) {
+				return [ 0, - 1 ];
+			}
+		} elseif ( '7' === $current ) {
+			if ( 0 === $direction_x && -1 === $direction_y ) {
+				return [ - 1, 0 ];
+			} elseif ( 1 === $direction_x && 0 === $direction_y ) {
+				return [ 0, 1 ];
+			}
+		} elseif ( 'F' === $current ) {
+			if ( 0 === $direction_x && -1 === $direction_y ) {
+				return [ 1, 0 ];
+			} elseif ( -1 === $direction_x && 0 === $direction_y ) {
+				return [ 0, 1 ];
+			}
+		}
+
+		return false;
+	}
+
 	/**
 	 * Parses puzzle data from the file.
 	 *
@@ -130,8 +245,9 @@ class Day10 {
 	 * @param int    $part Puzzle part, 1 or 2.
 	 */
 	private function parse_data( string $test, int $part ): void {
-		$file       = $test ? '/data/day-10-test.txt' : '/data/day-10.txt';
-		$this->data = file_get_contents( __DIR__ . $file );
+		$file        = $test ? '/data/day-10-test.txt' : '/data/day-10.txt';
+		$this->lines = file( __DIR__ . $file, FILE_IGNORE_NEW_LINES );
+		$this->data  = file_get_contents( __DIR__ . $file );
 	}
 }
 
