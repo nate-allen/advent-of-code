@@ -26,7 +26,7 @@ class Day17 {
 	 * @return int The minimum heat loss.
 	 */
 	public function part_1(): int {
-		return $this->find_min_heat_loss( [ $this->columns - 1, $this->rows - 1 ], 1, 3 );
+		return $this->find_min_heat_loss( 1, 3 );
 	}
 
 	/**
@@ -35,19 +35,18 @@ class Day17 {
 	 * @return int The minimum heat loss.
 	 */
 	public function part_2(): int {
-		return $this->find_min_heat_loss( [ $this->columns - 1, $this->rows - 1 ], 4, 10 );
+		return $this->find_min_heat_loss( 4, 10 );
 	}
 
 	/**
 	 * Find the minimum heat loss within specified distance constraints.
 	 *
-	 * @param array $target_position The target position (end point).
 	 * @param int   $min_distance    The minimum distance before a direction change counts.
 	 * @param int   $max_distance    The maximum distance allowed for a single direction.
 	 *
-	 * @return int The minimum heat loss encountered on the path to the target.
+	 * @return int The minimum heat loss encountered on the path to the bottom right corner.
 	 */
-	private function find_min_heat_loss( array $target_position, int $min_distance, int $max_distance ): int {
+	private function find_min_heat_loss( int $min_distance, int $max_distance ): int {
 		$heap          = new SplMinHeap();
 		$visited       = []; // Track visited
 		$min_heat_loss = PHP_INT_MAX; // Start with a large number
@@ -60,7 +59,7 @@ class Day17 {
 			[ $current_heat_loss, [ $x, $y, $current_direction, $number_of_moves ] ] = $heap->extract();
 
 			// If we reached the end, update the minimum heat loss
-			if ( [ $x, $y ] === $target_position ) {
+			if ( [ $x, $y ] === [ $this->columns - 1, $this->rows - 1 ] ) {
 				$min_heat_loss = min( $min_heat_loss, $current_heat_loss );
 			}
 
