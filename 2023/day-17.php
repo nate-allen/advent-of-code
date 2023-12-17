@@ -5,6 +5,7 @@
  */
 class Day17 {
 	private array $data;
+	private int $part;
 	private int $rows;
 	private int $columns;
 	private array $directions = [
@@ -16,6 +17,7 @@ class Day17 {
 
 	public function __construct(string $test, int $part) {
 		$this->parse_data($test, $part);
+		$this->part    = $part;
 		$this->rows    = count($this->data);
 		$this->columns = strlen($this->data[0]);
 	}
@@ -26,7 +28,7 @@ class Day17 {
 	 * @return int The minimum heat loss.
 	 */
 	public function part_1(): int {
-		return $this->find_min_heat_loss( 1, 3 );
+		return $this->find_min_heat_loss();
 	}
 
 	/**
@@ -35,21 +37,20 @@ class Day17 {
 	 * @return int The minimum heat loss.
 	 */
 	public function part_2(): int {
-		return $this->find_min_heat_loss( 4, 10 );
+		return $this->find_min_heat_loss();
 	}
 
 	/**
 	 * Find the minimum heat loss within specified distance constraints.
 	 *
-	 * @param int   $min_distance    The minimum distance before a direction change counts.
-	 * @param int   $max_distance    The maximum distance allowed for a single direction.
-	 *
 	 * @return int The minimum heat loss encountered on the path to the bottom right corner.
 	 */
-	private function find_min_heat_loss( int $min_distance, int $max_distance ): int {
+	private function find_min_heat_loss(): int {
 		$heap          = new SplMinHeap();
 		$visited       = []; // Track visited
 		$min_heat_loss = PHP_INT_MAX; // Start with a large number
+		$min_distance  = $this->part === 1 ? 1 : 4;
+		$max_distance  = $this->part === 1 ? 3 : 10;
 
 		// Starting with 0 heat loss, at position 0,0, coming from outside the grid, with 0 moves
 		$heap->insert( [ 0, [ 0, 0, 'down', 0 ] ] );
