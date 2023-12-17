@@ -48,19 +48,16 @@ class Day17 {
 	 * @return int The minimum heat loss encountered on the path to the target.
 	 */
 	private function find_min_heat_loss( array $target_position, int $min_distance, int $max_distance ): int {
-		// Starting with 0 heat loss, at position 0,0, coming from outside the grid, with 0 moves
-		$queue         = [ [ 0, [ 0, 0, 'down', 0 ] ] ];
+		$heap          = new SplMinHeap();
 		$visited       = []; // Track visited
 		$min_heat_loss = PHP_INT_MAX; // Start with a large number
 
-		while ( ! empty( $queue ) ) {
-			// Sort the queue based on the heat loss
-			usort( $queue, function ( $a, $b ) {
-				return $a[0] - $b[0];
-			} );
+		// Starting with 0 heat loss, at position 0,0, coming from outside the grid, with 0 moves
+		$heap->insert( [ 0, [ 0, 0, 'down', 0 ] ] );
 
+		while ( ! $heap->isEmpty() ) {
 			// Get next result with the lowest heat loss
-			[ $current_heat_loss, [ $x, $y, $current_direction, $number_of_moves ] ] = array_shift( $queue );
+			[ $current_heat_loss, [ $x, $y, $current_direction, $number_of_moves ] ] = $heap->extract();
 
 			// If we reached the end, update the minimum heat loss
 			if ( [ $x, $y ] === $target_position ) {
@@ -92,10 +89,10 @@ class Day17 {
 				// Update the priority queue and visited blocks
 				if ( ! isset( $visited[ $position_key ] ) || $visited[ $position_key ] > $new_heat_loss ) {
 					$visited[ $position_key ] = $new_heat_loss;
-					$queue[]                  = [
+					$heap->insert( [
 						$new_heat_loss,
 						[ $new_x, $new_y, $new_direction, $new_direction_change_count ]
-					];
+					] );
 				}
 			}
 		}
@@ -127,7 +124,6 @@ class Day17 {
 		$this->data = explode("\n", trim(file_get_contents(__DIR__ . $file)));
 	}
 }
-
 
 // Prompt which part to run and if it should use the test data.
 while ( true ) {
