@@ -49,7 +49,7 @@ class Day17 {
 	 */
 	private function find_min_heat_loss( array $target_position, int $min_distance, int $max_distance ): int {
 		// Starting with 0 heat loss, at position 0,0, coming from outside the grid, with 0 moves
-		$queue         = [ [ 0, [ 0, 0, -1, 0 ] ] ];
+		$queue         = [ [ 0, [ 0, 0, 'down', 0 ] ] ];
 		$visited       = []; // Track visited
 		$min_heat_loss = PHP_INT_MAX; // Start with a large number
 
@@ -67,7 +67,7 @@ class Day17 {
 				$min_heat_loss = min( $min_heat_loss, $current_heat_loss );
 			}
 
-			// Try neighboring nodes
+			// Try neighboring blocks
 			foreach ( $this->directions as $new_direction => $move ) {
 				$new_x = $x + $move[0];
 				$new_y = $y + $move[1];
@@ -89,7 +89,7 @@ class Day17 {
 				$new_heat_loss = $current_heat_loss + (int) ( $this->data[ $new_y ][ $new_x ] );
 				$position_key  = "$new_x,$new_y,$new_direction,$new_direction_change_count";
 
-				// Update the priority queue and visited nodes
+				// Update the priority queue and visited blocks
 				if ( ! isset( $visited[ $position_key ] ) || $visited[ $position_key ] > $new_heat_loss ) {
 					$visited[ $position_key ] = $new_heat_loss;
 					$queue[]                  = [
@@ -119,7 +119,7 @@ class Day17 {
 			'right' => 'left'
 		];
 
-		return isset( $opposites[ $current_direction ] ) && $opposites[ $current_direction ] === $new_direction;
+		return $opposites[ $current_direction ] === $new_direction;
 	}
 
 	private function parse_data(string $test, int $part): void {
