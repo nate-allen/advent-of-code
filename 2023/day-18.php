@@ -24,10 +24,10 @@ class Day18 {
 	 * @var array
 	 */
 	private array $directions = [
-		'U' => [ 0, - 1 ], // Move up: No change in x, decrease y by 1
+		'R' => [ 1, 0 ],   // Move right: Increase x by 1, no change in y
 		'D' => [ 0, 1 ],   // Move down: No change in x, increase y by 1
 		'L' => [ - 1, 0 ], // Move left: Decrease x by 1, no change in y
-		'R' => [ 1, 0 ]    // Move right: Increase x by 1, no change in y
+		'U' => [ 0, - 1 ], // Move up: No change in x, decrease y by 1
 	];
 
 	public function __construct(string $test, int $part ) {
@@ -106,7 +106,7 @@ class Day18 {
 			$parts[2] = str_replace( [ '(', '#', ')' ], '', $parts[2] );
 
 			$array[0] = hexdec( substr( $parts[2], 0, 5 ) );
-			$array[1] = $this->directions[ hexdec( substr( $parts[2], 5, 1 ) ) ];
+			$array[1] = $this->directions[ substr( $parts[2], 5, 1 ) ];
 		}
 
 		return $array;
