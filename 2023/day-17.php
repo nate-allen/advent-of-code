@@ -1,17 +1,46 @@
 <?php
 
 /**
- * Day 17:
+ * Day 17: Clumsy Crucible
  */
 class Day17 {
+	/**
+	 * The puzzle data.
+	 *
+	 * @var array
+	 */
 	private array $data;
+
+	/**
+	 * The puzzle part, 1 or 2.
+	 *
+	 * @var int
+	 */
 	private int $part;
+
+	/**
+	 * The number of rows in the grid.
+	 *
+	 * @var int
+	 */
 	private int $rows;
+
+	/**
+	 * The number of columns in the grid.
+	 *
+	 * @var int
+	 */
 	private int $columns;
+
+	/**
+	 * Movement directions.
+	 *
+	 * @var array
+	 */
 	private array $directions = [
-		'up'    => [ 0, - 1 ],  // Move up: No change in x, decrease y by 1
+		'up'    => [ 0, - 1 ], // Move up: No change in x, decrease y by 1
 		'down'  => [ 0, 1 ],   // Move down: No change in x, increase y by 1
-		'left'  => [ - 1, 0 ],  // Move left: Decrease x by 1, no change in y
+		'left'  => [ - 1, 0 ], // Move left: Decrease x by 1, no change in y
 		'right' => [ 1, 0 ]    // Move right: Increase x by 1, no change in y
 	];
 
