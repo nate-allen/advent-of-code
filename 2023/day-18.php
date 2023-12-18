@@ -83,7 +83,7 @@ class Day18 {
 		}
 
 		$polygon_area         = $this->get_polygon_area( $polygon_points );
-		$perimeter_adjustment = $perimeter_distance / 2 + 1;
+		$perimeter_adjustment = $perimeter_distance / 2 + 1; // Add 1 to account for the corners.
 
 		return $polygon_area + $perimeter_adjustment;
 	}
@@ -175,7 +175,7 @@ function part_2( $test = false ) {
 	$day18    = new Day18( $test, 2 );
 	$result   = $day18->part_2();
 	$end      = microtime( true );
-	$expected = $test ? 952408144115 : 0;
+	$expected = $test ? 952408144115 : 54_058_824_661_845;
 
 	printf( 'Total:    %s' . PHP_EOL, $result );
 	printf( 'Expected: %s' . PHP_EOL, $expected );
