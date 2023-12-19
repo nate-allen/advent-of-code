@@ -91,7 +91,7 @@ class Day19 {
 			return 0;
 		} elseif ( 'A' === $label ) {
 			$total = 1;
-			foreach ( $ranges as $rating => $range ) {
+			foreach ( $ranges as $range ) {
 				$total *= $range['max'] - $range['min'] + 1;
 			}
 
