@@ -31,7 +31,8 @@ class Day19 {
 	}
 
 	/**
-	 * Part 1: Process each part through the workflows.
+	 * Part 1: Process each part through the workflows. What do you get if you add together all of the rating numbers
+	 *         for all of the parts that ultimately get accepted?
 	 *
 	 * @return int The sum of ratings for accepted parts.
 	 */
@@ -67,7 +68,7 @@ class Day19 {
 	}
 
 	/**
-	 * Part 2: Calculate the acceptance range using a tree structure.
+	 * Part 2: How many distinct combinations of ratings will be accepted?
 	 *
 	 * @return int The total count of accepted configurations.
 	 */
