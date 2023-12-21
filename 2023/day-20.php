@@ -5,6 +5,13 @@
  */
 class Day20 {
 	/**
+	 * Which part of the puzzle is being solved.
+	 *
+	 * @var int
+	 */
+	private int $part;
+
+	/**
 	 * Array of modules and what they're connected to.
 	 *
 	 * @var array
@@ -39,15 +46,23 @@ class Day20 {
 	 */
 	private int $high_pulse;
 
+	private array $rx_connections = [];
+	private array $found_cycles = [];
+
+	private int $button_presses = 0;
+
+	private mixed $part_2_result = 0;
+
 	/**
 	 * Constructor for Day20 class.
 	 *
 	 * @param string $test Indicates whether to use test data.
 	 */
-	public function __construct( string $test ) {
+	public function __construct( string $test, int $part ) {
 		$this->parse_data( $test );
 		$this->low_pulses = 0;
 		$this->high_pulse = 0;
+		$this->part = $part;
 	}
 
 	/**
@@ -69,13 +84,36 @@ class Day20 {
 	 * @return int The answer.
 	 */
 	public function part_2(): int {
-		return 0;
+		// Get the module that is connected to rx
+		$connected_to_rx = key( array_filter($this->module_connections, function($value) {
+			return in_array('rx', $value);
+		}) );
+
+		// Get the modules that connect to the module connected to rx
+		if ( isset( $this->conjunction_modules[ $connected_to_rx ] ) ) {
+			$this->rx_connections = array_merge( $this->rx_connections, $this->conjunction_modules[ $connected_to_rx ] );
+		}
+		if ( isset( $this->flip_flop_modules[ $connected_to_rx ] ) ) {
+			$this->rx_connections = array_merge( $this->rx_connections, $this->flip_flop_modules[ $connected_to_rx ] );
+		}
+
+		// Loop until press_button doesn't return 0
+		$result = 0;
+		for ( $i = 0; $i < 10000000; $i ++ ) {
+			$this->press_button();
+
+			if ( (int) $this->part_2_result > 0 ) {
+				break;
+			}
+		}
+
+		return (int) $this->part_2_result;
 	}
 
 	/**
 	 * Handles the pulse logic.
 	 */
-	private function press_button(): void {
+	private function press_button(): int {
 		// Add the low pulse from the button press
 		$this->low_pulses += 1 + count( $this->module_connections ['broadcaster'] );
 		$pulse_queue      = [];
@@ -95,6 +133,28 @@ class Day20 {
 			}
 
 			$pulse_to_send = 0;
+
+			// Check for cycles for part 2
+			if ( ! $pulse && isset( $this->rx_connections[ $label ] ) ) {
+				if ( $this->rx_connections[ $label ] > 0 && ! isset( $this->found_cycles[ $label ] ) ) {
+					// Mark a cycle as found and calculate its length.
+
+					$this->found_cycles[ $label ] = $this->button_presses - $this->rx_connections[ $label ];
+
+					// If all cycles are found, calculate the least common multiple for part 2.
+					if ( count( $this->found_cycles ) === count( $this->rx_connections ) ) {
+
+						$this->part_2_result = array_shift( $this->found_cycles );
+
+						foreach ( $this->found_cycles as $cycleLength ) {
+							$this->part_2_result = gmp_lcm( $this->part_2_result, $cycleLength );
+						}
+					}
+				} else {
+					// Update the cycle tracker.
+					$this->rx_connections[ $label ] = $this->button_presses;
+				}
+			}
 
 			// Handle conjunction modules
 			if ( array_key_exists( $label, $this->conjunction_modules ) ) {
@@ -205,7 +265,7 @@ function part_2( $test = false ) {
 	$day20    = new Day20( $test, 2 );
 	$result   = $day20->part_2();
 	$end      = microtime( true );
-	$expected = $test ? 0 : 0;
+	$expected = $test ? 0 : 220366255099387;
 
 	printf( 'Total:    %s' . PHP_EOL, $result );
 	printf( 'Expected: %s' . PHP_EOL, $expected );
