@@ -1,0 +1,16 @@
+{
+  "name": "advent-of-code",
+  "version": "1.0.0",
+  "description": "",
+  "main": "day-24.js",
+  "type": "module",
+  "scripts": {
+    "start": "node day-24.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "z3-solver": "^version"
+  }
+}

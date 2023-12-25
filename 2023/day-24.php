@@ -1,5 +1,8 @@
 <?php
-ini_set('precision', 20);
+ini_set( 'precision', 20 );
+
+require 'vendor/autoload.php';
+
 /**
  * Day 24: Never Tell Me The Odds
  */
@@ -79,12 +82,12 @@ class Day24 {
 	}
 
 	/**
-	 * Part 2:
+	 * Part 2: Find the exact position and velocity for the rock to hit every hailstone.
 	 *
-	 * @return int The answer.
+	 * @return string Instructions for running part 2.
 	 */
-	public function part_2(): int {
-		return 0;
+	public function part_2(): string {
+		return 'Run this command for part 2: npm install; node day-24.js';
 	}
 
 	private function parse_data( bool $test ): void {
@@ -131,13 +134,6 @@ function part_1( $test = false ) {
 }
 
 function part_2( $test = false ) {
-	$start    = microtime( true );
-	$day24    = new Day24( $test, 2 );
-	$result   = $day24->part_2();
-	$end      = microtime( true );
-	$expected = $test ? 16733044 : 616583483179597;
-
-	printf( 'Total:    %s' . PHP_EOL, $result );
-	printf( 'Expected: %s' . PHP_EOL, $expected );
-	printf( 'Time:     %s seconds' . PHP_EOL, round( $end - $start, 4 ) );
+	$day24 = new Day24( $test, 2 );
+	echo $day24->part_2();
 }
