@@ -18,9 +18,19 @@ class Day25 {
 	 */
 	private bool $is_test;
 
-	private $component_to_id = [];
+	/**
+	 * Array of components and their IDs.
+	 *
+	 * @var array
+	 */
+	private array $components = [];
 
-	private $wires = [];
+	/**
+	 * Array of wire connections between components.
+	 *
+	 * @var array
+	 */
+	private array $wires = [];
 
 	public function __construct(string $test, int $part) {
 		$this->part = $part;
@@ -35,15 +45,15 @@ class Day25 {
 	 * @return int
 	 */
 	public function part_1(): int {
-		while (true) {
-			$groups = $this->find_groups( count( $this->component_to_id ), $this->wires );
+		while ( true ) {
+			$groups = $this->find_groups( count( $this->components ), $this->wires );
 
-			if (!is_null($groups)) {
-				$group1_count = count(array_filter($groups, function ($x) use ($groups) {
+			if ( ! is_null( $groups ) ) {
+				$group1_count = count( array_filter( $groups, function ( $x ) use ( $groups ) {
 					return $x === $groups[0];
-				}));
+				} ) );
 
-				return $group1_count * (count($this->component_to_id) - $group1_count);
+				return $group1_count * ( count( $this->components ) - $group1_count );
 			}
 		}
 	}
@@ -158,8 +168,8 @@ class Day25 {
 	 * @param string $component The component to add.
 	 */
 	private function add_component( string $component ): void {
-		if ( ! array_key_exists( $component, $this->component_to_id ) ) {
-			$this->component_to_id[ $component ] = count( $this->component_to_id );
+		if ( ! array_key_exists( $component, $this->components ) ) {
+			$this->components[ $component ] = count( $this->components );
 		}
 	}
 
@@ -170,7 +180,7 @@ class Day25 {
 	 * @param string $component2 The second component.
 	 */
 	private function add_wire( string $component1, string $component2 ): void {
-		$this->wires[] = [ $this->component_to_id[ $component1 ], $this->component_to_id[ $component2 ] ];
+		$this->wires[] = [ $this->components[ $component1 ], $this->components[ $component2 ] ];
 	}
 
 	/**
