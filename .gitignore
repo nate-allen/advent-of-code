@@ -3,3 +3,9 @@
 template.php
 data/test-data.txt
 2023/node_modules/
+
+# Ignore real data
+*/data/day-??.txt
+
+# Allow test data
+!*/data/day-??-test.txt
