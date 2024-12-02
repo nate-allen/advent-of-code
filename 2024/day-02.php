@@ -3,7 +3,7 @@
 namespace AdventOfCode\Year2024;
 
 /**
- * Day 02: TITLE HERE
+ * Day 02: Reactor Safety Reports
  */
 class Day02 {
 	/**
@@ -47,23 +47,82 @@ class Day02 {
 	}
 
 	/**
-	 * Part 1: SHORT_DESCRIPTION_HERE
+	 * Part 1: Determine the number of safe reports.
 	 *
 	 * @return int
 	 */
 	private function solve_part_1(): int {
-		// CODE HERE
-		return 0;
+		$total = 0;
+
+		foreach ( $this->data as $levels ) {
+			if ( $this->is_safe( $levels ) ) {
+				$total ++;
+			}
+		}
+
+		return $total;
 	}
 
 	/**
-	 * Part 2: SHORT_DESCRIPTION_HERE
+	 * Part 2: Determine the number of safe reports with the Problem Dampener.
 	 *
 	 * @return int
 	 */
 	private function solve_part_2(): int {
-		// CODE HERE
-		return 0;
+		$total = 0;
+
+		foreach ( $this->data as $levels ) {
+			// Check if the report is already safe
+			if ( $this->is_safe( $levels ) ) {
+				$total ++;
+				continue;
+			}
+
+			// Try removing each level and check if the report becomes safe
+			for ( $i = 0; $i < count( $levels ); $i ++ ) {
+				$levels_copy = $levels;
+				unset( $levels_copy[ $i ] ); // Remove one
+
+				if ( $this->is_safe( array_values( $levels_copy ) ) ) {
+					$total ++;
+					break;
+				}
+			}
+		}
+
+		return $total;
+	}
+
+	/**
+	 * Checks if a report is safe based on the levels.
+	 *
+	 * @param array $levels The levels to check.
+	 *
+	 * @return bool True if the report is safe, false otherwise.
+	 */
+	private function is_safe( array $levels ): bool {
+		$is_increasing     = true;
+		$is_decreasing     = true;
+		$valid_differences = true;
+
+		for ( $i = 1; $i < count( $levels ); $i ++ ) {
+			$diff = $levels[ $i ] - $levels[ $i - 1 ];
+
+			// Check if levels differ by at least one and at most three
+			if ( abs( $diff ) < 1 || abs( $diff ) > 3 ) {
+				$valid_differences = false;
+				break;
+			}
+
+			// Is it increasing or decreasing?
+			if ( $diff > 0 ) {
+				$is_decreasing = false;
+			} elseif ( $diff < 0 ) {
+				$is_increasing = false;
+			}
+		}
+
+		return $valid_differences && ( $is_increasing || $is_decreasing );
 	}
 
 	/**
@@ -77,7 +136,8 @@ class Day02 {
 		$file  = $test ? '/data/day-02-test.txt' : '/data/day-02.txt';
 		$lines = explode( "\n", trim( file_get_contents( __DIR__ . $file ) ) );
 
-		return $lines;
+		// Convert each line into an array of integers
+		return array_map( fn( $line ) => array_map( 'intval', explode( ' ', $line ) ), $lines );
 	}
 }
 
@@ -96,12 +156,12 @@ function run_part( int $part, bool $test ): void {
 	// Define expected results for validation
 	$expected_values = [
 		1 => [
-			'test' => 0,
-			'real' => 123
+			'test' => 2,
+			'real' => 526,
 		],
 		2 => [
-			'test' => 0,
-			'real' => 456
+			'test' => 4,
+			'real' => 566,
 		],
 	];
 
