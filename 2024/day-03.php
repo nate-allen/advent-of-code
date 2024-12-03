@@ -77,19 +77,19 @@ class Day03 {
 		(?P<dont>don\'t\s*\(\s*\))
 	/x';
 
-		preg_match_all( $pattern, $this->data, $matches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE );
+		preg_match_all( $pattern, $this->data, $matches, PREG_SET_ORDER );
 
 		$total   = 0;
 		$enabled = true;
 
 		foreach ( $matches as $match ) {
-			if ( ! empty( $match['do'][0] ) ) {
+			if ( ! empty( $match['do'] ) ) {
 				$enabled = true;
-			} elseif ( ! empty( $match['dont'][0] ) ) {
+			} elseif ( ! empty( $match['dont'] ) ) {
 				$enabled = false;
-			} elseif ( ! empty( $match['mul'][0] ) && $enabled ) {
-				$x     = (int) $match['x'][0];
-				$y     = (int) $match['y'][0];
+			} elseif ( ! empty( $match['mul'] ) && $enabled ) {
+				$x     = (int) $match['x'];
+				$y     = (int) $match['y'];
 				$total += $x * $y;
 			}
 		}
