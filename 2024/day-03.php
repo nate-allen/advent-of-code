@@ -57,9 +57,7 @@ class Day03 {
 		$total = 0;
 
 		foreach ( $matches as $match ) {
-			$x     = intval( $match[1] );
-			$y     = intval( $match[2] );
-			$total += $x * $y;
+			$total += intval( $match[1] ) * intval( $match[2] );
 		}
 
 		return $total;
@@ -88,9 +86,7 @@ class Day03 {
 			} elseif ( ! empty( $match['dont'] ) ) {
 				$enabled = false;
 			} elseif ( ! empty( $match['mul'] ) && $enabled ) {
-				$x     = (int) $match['x'];
-				$y     = (int) $match['y'];
-				$total += $x * $y;
+				$total += intval( $match['x'] ) * intval( $match['y'] );
 			}
 		}
 
