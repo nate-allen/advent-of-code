@@ -72,10 +72,10 @@ class Day03 {
 	 */
 	private function solve_part_2(): int {
 		$pattern = '/
-		(?P<mul>mul\s*\(\s*(?P<x>[0-9]{1,3})\s*,\s*(?P<y>[0-9]{1,3})\s*\)) |
-		(?P<do>do\s*\(\s*\)) |
-		(?P<dont>don\'t\s*\(\s*\))
-	/x';
+			(?P<mul>mul\s*\(\s*(?P<x>[0-9]{1,3})\s*,\s*(?P<y>[0-9]{1,3})\s*\)) |
+			(?P<do>do\s*\(\s*\)) |
+			(?P<dont>don\'t\s*\(\s*\))
+		/x';
 
 		preg_match_all( $pattern, $this->data, $matches, PREG_SET_ORDER );
 
