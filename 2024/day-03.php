@@ -3,7 +3,7 @@
 namespace AdventOfCode\Year2024;
 
 /**
- * Day 03: TITLE HERE
+ * Day 03: Mull It Over
  */
 class Day03 {
 	/**
@@ -23,9 +23,9 @@ class Day03 {
 	/**
 	 * Parsed data from the input file.
 	 *
-	 * @var array
+	 * @var string
 	 */
-	private array $data;
+	private string $data;
 
 	public function __construct( bool $test, int $part ) {
 		$this->part    = $part;
@@ -47,23 +47,54 @@ class Day03 {
 	}
 
 	/**
-	 * Part 1: SHORT_DESCRIPTION_HERE
+	 * Part 1: Add up all the results of the multiplication instructions.
 	 *
 	 * @return int
 	 */
 	private function solve_part_1(): int {
-		// CODE HERE
-		return 0;
+		preg_match_all( '/mul\(([0-9]{1,3}),([0-9]{1,3})\)/', $this->data, $matches, PREG_SET_ORDER );
+
+		$total = 0;
+
+		foreach ( $matches as $match ) {
+			$x     = intval( $match[1] );
+			$y     = intval( $match[2] );
+			$total += $x * $y;
+		}
+
+		return $total;
 	}
 
 	/**
-	 * Part 2: SHORT_DESCRIPTION_HERE
+	 * Part 2: Add up all the results of just the *enabled* multiplication instructions.
 	 *
 	 * @return int
 	 */
 	private function solve_part_2(): int {
-		// CODE HERE
-		return 0;
+		$pattern = '/
+		(?P<mul>mul\s*\(\s*(?P<x>[0-9]{1,3})\s*,\s*(?P<y>[0-9]{1,3})\s*\)) |
+		(?P<do>do\s*\(\s*\)) |
+		(?P<dont>don\'t\s*\(\s*\))
+	/x';
+
+		preg_match_all( $pattern, $this->data, $matches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE );
+
+		$total   = 0;
+		$enabled = true;
+
+		foreach ( $matches as $match ) {
+			if ( ! empty( $match['do'][0] ) ) {
+				$enabled = true;
+			} elseif ( ! empty( $match['dont'][0] ) ) {
+				$enabled = false;
+			} elseif ( ! empty( $match['mul'][0] ) && $enabled ) {
+				$x     = (int) $match['x'][0];
+				$y     = (int) $match['y'][0];
+				$total += $x * $y;
+			}
+		}
+
+		return $total;
 	}
 
 	/**
@@ -71,13 +102,12 @@ class Day03 {
 	 *
 	 * @param bool $test Whether test data should be used.
 	 *
-	 * @return array
+	 * @return string
 	 */
-	private function parse_data( bool $test ): array {
-		$file  = $test ? '/data/day-03-test.txt' : '/data/day-03.txt';
-		$lines = explode( "\n", trim( file_get_contents( __DIR__ . $file ) ) );
+	private function parse_data( bool $test ): string {
+		$file = $test ? '/data/day-03-test.txt' : '/data/day-03.txt';
 
-		return $lines;
+		return trim( file_get_contents( __DIR__ . $file ) );
 	}
 }
 
@@ -96,12 +126,12 @@ function run_part( int $part, bool $test ): void {
 	// Define expected results for validation
 	$expected_values = [
 		1 => [
-			'test' => 0,
-			'real' => 123
+			'test' => 161,
+			'real' => 173785482
 		],
 		2 => [
-			'test' => 0,
-			'real' => 456
+			'test' => 48,
+			'real' => 83158140
 		],
 	];
 
