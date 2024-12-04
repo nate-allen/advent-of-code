@@ -107,34 +107,6 @@ class Day04 {
 	}
 
 	/**
-	 * Checks if a pattern exists with the given position as the center.
-	 *
-	 * @param array   $pattern The pattern to search for.
-	 * @param integer $r       The center row of the pattern.
-	 * @param integer $c       The center column of the pattern.
-	 *
-	 * @return bool
-	 */
-	private function matches_pattern(array $pattern, int $r, int $c): bool {
-		foreach ($pattern as $top) {
-			foreach ($pattern as $bottom) {
-				if (
-					$this->data[$r - 1][$c - 1] === $top[0] &&
-					$this->data[$r][$c] === $top[1] &&
-					$this->data[$r + 1][$c + 1] === $top[2] &&
-					$this->data[$r + 1][$c - 1] === $bottom[0] &&
-					$this->data[$r][$c] === $bottom[1] &&
-					$this->data[$r - 1][$c + 1] === $bottom[2]
-				) {
-					return true;
-				}
-			}
-		}
-
-		return false;
-	}
-
-	/**
 	 * Checks if a word can be found in the grid starting from a given position and moving in a given direction.
 	 *
 	 * @param string  $word The word to search for.
@@ -166,6 +138,34 @@ class Day04 {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Checks if a pattern exists with the given position as the center.
+	 *
+	 * @param array   $pattern The pattern to search for.
+	 * @param integer $r       The center row of the pattern.
+	 * @param integer $c       The center column of the pattern.
+	 *
+	 * @return bool
+	 */
+	private function matches_pattern( array $pattern, int $r, int $c ): bool {
+		foreach ( $pattern as $top ) {
+			foreach ( $pattern as $bottom ) {
+				if (
+					$this->data[ $r - 1 ][ $c - 1 ] === $top[0] &&
+					$this->data[ $r ][ $c ] === $top[1] &&
+					$this->data[ $r + 1 ][ $c + 1 ] === $top[2] &&
+					$this->data[ $r + 1 ][ $c - 1 ] === $bottom[0] &&
+					$this->data[ $r ][ $c ] === $bottom[1] &&
+					$this->data[ $r - 1 ][ $c + 1 ] === $bottom[2]
+				) {
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 
 	/**
