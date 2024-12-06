@@ -28,6 +28,13 @@ class Day06 {
 	private array $data;
 
 	/**
+	 * The guard's position on the map.
+	 *
+	 * @var array
+	 */
+	private array $guard_position;
+
+	/**
 	 * Mapping of directions.
 	 *
 	 * @var array
@@ -52,9 +59,10 @@ class Day06 {
 	];
 
 	public function __construct( bool $test, int $part ) {
-		$this->part    = $part;
-		$this->is_test = $test;
-		$this->data    = $this->parse_data( $this->is_test );
+		$this->part           = $part;
+		$this->is_test        = $test;
+		$this->data           = $this->parse_data( $this->is_test );
+		$this->guard_position = $this->find_guard( $this->data );
 	}
 
 	/**
@@ -76,12 +84,45 @@ class Day06 {
 	 * @return integer
 	 */
 	private function solve_part_1(): int {
-		$map  = $this->data;
-		$rows = count( $map );
-		$cols = strlen( $map[0] );
-		[ $guard_position, $guard_direction ] = $this->find_guard( $map );
+		return count( $this->get_guard_path() );
+	}
 
-		$visited_positions = [ "{$guard_position[0]},{$guard_position[1]}" ];
+	/**
+	 * Part 2: Place an obstruction to create a loop. How many possible positions are there to place the obstruction?
+	 *
+	 * @return integer
+	 */
+	private function solve_part_2(): int {
+		$guard_path     = $this->get_guard_path();
+		$guard_position = $this->find_guard( $this->data );
+
+		$loops = 0;
+
+		foreach ( $guard_path as $key => $position ) {
+			$map_copy             = $this->data;
+			$map_copy[ $position[0] ][ $position[1] ] = '#';
+
+			if ( $this->check_loop( $map_copy, $guard_position ) ) {
+				$loops ++;
+			}
+		}
+
+		return $loops;
+	}
+
+
+	/**
+	 * Simulates the guard's patrol path.
+	 *
+	 * @return array The guard's patrol path.
+	 */
+	private function get_guard_path(): array {
+		$rows            = count( $this->data );
+		$cols            = strlen( $this->data[0] );
+		$guard_position  = $this->guard_position;
+		$guard_direction = '^';
+
+		$visited_positions = [];
 
 		while ( true ) {
 			[ $row, $col ] = $this->directions[ $guard_direction ];
@@ -91,41 +132,15 @@ class Day06 {
 				break;
 			}
 
-			if ( $map[ $next_position[0] ][ $next_position[1] ] === '#' ) {
+			if ( $this->data[ $next_position[0] ][ $next_position[1] ] === '#' ) {
 				$guard_direction = $this->turn_right[ $guard_direction ];
 			} else {
 				$guard_position      = $next_position;
-				$visited_positions[] = "{$guard_position[0]},{$guard_position[1]}";
+				$visited_positions[ "{$guard_position[0]},{$guard_position[1]}"] = $guard_position;
 			}
 		}
 
-		return count( array_unique( $visited_positions ) );
-	}
-
-	/**
-	 * Part 2: Place an obstruction to create a loop. How many possible positions are there to place the obstruction?
-	 *
-	 * @return integer
-	 */
-	private function solve_part_2(): int {
-		$map  = $this->data;
-		$rows = count( $map );
-		$cols = strlen( $map[0] );
-		[ $guard_position, $guard_direction ] = $this->find_guard( $map );
-
-		$valid_positions = $this->get_valid_positions( $map, $rows, $cols );
-		$loop_positions  = 0;
-
-		foreach ( $valid_positions as [$r, $c] ) {
-			$map_copy             = $map;
-			$map_copy[ $r ][ $c ] = '#';
-
-			if ( $this->check_loop( $map_copy, $guard_position, $guard_direction ) ) {
-				$loop_positions ++;
-			}
-		}
-
-		return $loop_positions;
+		return $visited_positions;
 	}
 
 	/**
@@ -141,12 +156,12 @@ class Day06 {
 		foreach ( $map as $r => $line ) {
 			$c = strpos( $line, $guard_direction );
 			if ( $c !== false ) {
-				return [ [ $r, $c ], $guard_direction ];
+				return [ $r, $c ];
 			}
 		}
 
 		// Guard not found. This should not happen.
-		return [ [ 0, 0 ], $guard_direction ];
+		return [ 0, 0 ];
 	}
 
 	/**
@@ -165,41 +180,17 @@ class Day06 {
 	}
 
 	/**
-	 * Gets valid positions for placing an obstruction.
-	 *
-	 * @param array   $map  The map of the area.
-	 * @param integer $rows The number of rows in the map.
-	 * @param integer $cols The number of columns in the map.
-	 *
-	 * @return array The candidate positions.
-	 */
-	private function get_valid_positions( array $map, int $rows, int $cols ): array {
-		$candidate_positions = [];
-
-		foreach ( $map as $r => $line ) {
-			for ( $c = 0; $c < $cols; $c ++ ) {
-				if ( $line[ $c ] === '.' ) {
-					$candidate_positions[] = [ $r, $c ];
-				}
-			}
-		}
-
-		return $candidate_positions;
-	}
-
-	/**
 	 * Checks if the guard creates a loop when patrolling.
 	 *
 	 * @param array  $map             The map of the area.
 	 * @param array  $guard_position  The guard's initial position.
-	 * @param string $guard_direction The guard's initial direction.
 	 *
 	 * @return bool True if a loop is detected, false otherwise.
 	 */
-	private function check_loop( array $map, array $guard_position, string $guard_direction ): bool {
+	private function check_loop( array $map, array $guard_position ): bool {
 		$visited           = [];
 		$current_position  = $guard_position;
-		$current_direction = $guard_direction;
+		$current_direction = '^';
 
 		while ( true ) {
 			[ $row, $col ] = $this->directions[ $current_direction ];
