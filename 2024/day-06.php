@@ -139,6 +139,9 @@ class Day06 {
 			}
 		}
 
+		// remove the starting position from the list
+		unset( $visited_positions[ "{$this->guard_position[0]},{$this->guard_position[1]}" ] );
+
 		return $visited_positions;
 	}
 
