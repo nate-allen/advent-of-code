@@ -94,7 +94,6 @@ class Day06 {
 	 */
 	private function solve_part_2(): int {
 		$guard_path     = $this->get_guard_path();
-		$guard_position = $this->find_guard( $this->data );
 
 		$loops = 0;
 
@@ -102,7 +101,7 @@ class Day06 {
 			$map_copy             = $this->data;
 			$map_copy[ $position[0] ][ $position[1] ] = '#';
 
-			if ( $this->check_loop( $map_copy, $guard_position ) ) {
+			if ( $this->check_loop( $map_copy ) ) {
 				$loops ++;
 			}
 		}
@@ -182,14 +181,13 @@ class Day06 {
 	/**
 	 * Checks if the guard creates a loop when patrolling.
 	 *
-	 * @param array  $map             The map of the area.
-	 * @param array  $guard_position  The guard's initial position.
+	 * @param array $map The map of the area.
 	 *
-	 * @return bool True if a loop is detected, false otherwise.
+	 * @return bool
 	 */
-	private function check_loop( array $map, array $guard_position ): bool {
+	private function check_loop( array $map ): bool {
 		$visited           = [];
-		$current_position  = $guard_position;
+		$current_position  = $this->guard_position;
 		$current_direction = '^';
 
 		while ( true ) {
