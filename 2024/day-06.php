@@ -93,20 +93,20 @@ class Day06 {
 	 * @return integer
 	 */
 	private function solve_part_2(): int {
-		$guard_path     = $this->get_guard_path();
+		$guard_path = $this->get_guard_path();
 
-		$loops = 0;
+		$possible_positions = 0;
 
 		foreach ( $guard_path as $key => $position ) {
 			$map_copy             = $this->data;
 			$map_copy[ $position[0] ][ $position[1] ] = '#';
 
 			if ( $this->check_loop( $map_copy ) ) {
-				$loops ++;
+				$possible_positions ++;
 			}
 		}
 
-		return $loops;
+		return $possible_positions;
 	}
 
 
