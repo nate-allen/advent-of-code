@@ -98,6 +98,12 @@ class Day07 {
 			$current = array_shift( $numbers );
 		}
 
+		// Optimization: If the current value is already greater than the target, it's impossible to reach the target.
+		// Bail out early to save time.
+		if ( $current > $target ) {
+			return false;
+		}
+
 		// When $numbers is finally empty we can check if if $current matches the target.
 		if ( empty( $numbers ) ) {
 			return $current === $target;
