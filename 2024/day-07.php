@@ -171,7 +171,7 @@ function run_part( int $part, bool $test ): void {
 		],
 		2 => [
 			'test' => 11387,
-			'real' => 0,
+			'real' => 271691107779347,
 		],
 	];
 
