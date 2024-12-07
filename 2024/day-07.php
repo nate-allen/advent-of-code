@@ -3,7 +3,7 @@
 namespace AdventOfCode\Year2024;
 
 /**
- * Day 07: TITLE HERE
+ * Day 07: Bridge Repair
  */
 class Day07 {
 	/**
@@ -47,23 +47,82 @@ class Day07 {
 	}
 
 	/**
-	 * Part 1: SHORT_DESCRIPTION_HERE
+	 * Part 1: Determine total calibration result by trying addition and multiplication.
 	 *
 	 * @return int
 	 */
 	private function solve_part_1(): int {
-		// CODE HERE
-		return 0;
+		$total = 0;
+
+		foreach ( $this->data as $line ) {
+			[ $target, $numbers ] = $line;
+			if ( $this->do_math( $numbers, $target ) ) {
+				$total += $target;
+			}
+		}
+
+		return $total;
 	}
 
 	/**
-	 * Part 2: SHORT_DESCRIPTION_HERE
+	 * Part 2: Determine total calibration result by trying addition, multiplication, and concatenation.
 	 *
 	 * @return int
 	 */
 	private function solve_part_2(): int {
-		// CODE HERE
-		return 0;
+		$total = 0;
+
+		foreach ( $this->data as $line ) {
+			[ $target, $numbers ] = $line;
+			if ( $this->do_math( $numbers, $target ) ) {
+				$total += $target;
+			}
+		}
+
+		return $total;
+	}
+
+	/**
+	 * Recursively evaluates all combinations of addition, multiplication,
+	 * and (for part 2) concatenation to determine if the target value can be produced.
+	 *
+	 * @param array        $numbers The remaining numbers to process.
+	 * @param integer      $target  The target value to match.
+	 * @param integer|null $current The current value of the ongoing calculation.
+	 *
+	 * @return bool
+	 */
+	private function do_math(array $numbers, int $target, ?int $current = null): bool {
+		// If this is the first iteration, get the first number.
+		if ( $current === null ) {
+			$current = array_shift( $numbers );
+		}
+
+		// When $numbers is finally empty we can check if if $current matches the target.
+		if ( empty( $numbers ) ) {
+			return $current === $target;
+		}
+
+		// Get the next number.
+		$next = array_shift( $numbers );
+
+		// Try addition
+		if ( $this->do_math( $numbers, $target, $current + $next ) ) {
+			return true;
+		}
+
+		// Try multiplication
+		if ( $this->do_math( $numbers, $target, $current * $next ) ) {
+			return true;
+		}
+
+		// Try concatenation (only for part 2)
+		if ( $this->part === 2 && $this->do_math( $numbers, $target, (int) ( $current . $next ) ) ) {
+			return true;
+		}
+
+		// If none of the operations match the target, return false
+		return false;
 	}
 
 	/**
@@ -77,7 +136,12 @@ class Day07 {
 		$file  = $test ? '/data/day-07-test.txt' : '/data/day-07.txt';
 		$lines = explode( "\n", trim( file_get_contents( __DIR__ . $file ) ) );
 
-		return $lines;
+		return array_map( function ( $line ) {
+			[ $target, $numbers ] = explode( ':', $line );
+			$numbers = array_map( 'intval', explode( ' ', trim( $numbers ) ) );
+
+			return [ (int) $target, $numbers ];
+		}, $lines );
 	}
 }
 
@@ -96,12 +160,12 @@ function run_part( int $part, bool $test ): void {
 	// Define expected results for validation
 	$expected_values = [
 		1 => [
-			'test' => 0,
-			'real' => 123
+			'test' => 3749,
+			'real' => 945512582195,
 		],
 		2 => [
-			'test' => 0,
-			'real' => 456
+			'test' => 11387,
+			'real' => 0,
 		],
 	];
 
