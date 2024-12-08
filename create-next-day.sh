@@ -11,7 +11,10 @@ echo "Most recent year directory: $YEAR_DIR"
 
 # Step 2: Identify the most recent completed day
 LAST_DAY=$(ls "$YEAR_DIR" | grep -E 'day-[0-9]{2}\.php' | sed -E 's/day-([0-9]{2})\.php/\1/' | sort -n | tail -n 1)
-NEXT_DAY=$(printf "%02d" $((10#$LAST_DAY + 1)))
+LAST_DAY=${LAST_DAY:-001}
+LAST_DAY=$((10#$LAST_DAY)) # Convert to a proper base-10 number
+NEXT_DAY=$((LAST_DAY + 1))
+NEXT_DAY=$(printf "%02d" $NEXT_DAY)
 
 echo "Last completed day: $LAST_DAY"
 echo "Next day to create: $NEXT_DAY"
@@ -20,12 +23,12 @@ echo "Next day to create: $NEXT_DAY"
 read -p "Enter the day to create [$NEXT_DAY]: " CHOSEN_DAY
 CHOSEN_DAY=${CHOSEN_DAY:-$NEXT_DAY} # Use default if no input is provided
 
-# Ensure the chosen day is a valid two-digit number
+# Ensure the chosen day is a valid number and remove leading zeros
 if ! [[ $CHOSEN_DAY =~ ^[0-9]{1,2}$ ]]; then
   echo "Invalid day. Please enter a number between 1 and 31."
   exit 1
 fi
-CHOSEN_DAY=$(printf "%02d" $CHOSEN_DAY)
+CHOSEN_DAY=$(printf "%02d" $((10#$CHOSEN_DAY)))
 
 # Step 4: Check if the file already exists
 NEW_FILE="$YEAR_DIR/day-$CHOSEN_DAY.php"
