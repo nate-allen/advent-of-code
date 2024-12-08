@@ -118,11 +118,6 @@ class Day08 {
 					$dx  = $pos2[0] - $pos1[0];
 					$dy  = $pos2[1] - $pos1[1];
 
-					// Find the greatest common divisor of the two distances to simplify the line
-					$gcd = gmp_intval( gmp_gcd( $dx, $dy ) );
-					$dx /= $gcd;
-					$dy /= $gcd;
-
 					// Extend the line in the forward direction (from pos1 to beyond pos2).
 					$x = $pos1[0];
 					$y = $pos1[1];
