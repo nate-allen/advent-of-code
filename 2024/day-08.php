@@ -3,7 +3,7 @@
 namespace AdventOfCode\Year2024;
 
 /**
- * Day 08: TITLE HERE
+ * Day 08: Resonant Collinearity
  */
 class Day08 {
 	/**
@@ -47,23 +47,141 @@ class Day08 {
 	}
 
 	/**
-	 * Part 1: SHORT_DESCRIPTION_HERE
+	 * Part 1: Calculate unique locations of antinodes.
 	 *
 	 * @return int
 	 */
 	private function solve_part_1(): int {
-		// CODE HERE
-		return 0;
+		$antinodes = [];
+
+		// For each frequency, find antinodes
+		foreach ( $this->get_antennas_by_frequency() as $positions ) {
+			$count = count( $positions );
+			for ( $i = 0; $i < $count; $i ++ ) {
+				for ( $j = $i + 1; $j < $count; $j ++ ) {
+					$pos1 = $positions[ $i ]; // First antenna position
+					$pos2 = $positions[ $j ]; // Second antenna position
+
+					// Difference in x and y between the two antennas.
+					$dx = $pos2[0] - $pos1[0];
+					$dy = $pos2[1] - $pos1[1];
+
+					// Calculate the first antinode position by extending the line backward
+					$x1 = $pos1[0] - $dx;
+					$y1 = $pos1[1] - $dy;
+
+					// Make sure it's within the bounds of the map
+					if ( $x1 >= 0 && $x1 < strlen( $this->data[0] ) && $y1 >= 0 && $y1 < count( $this->data ) ) {
+						$antinodes["$x1,$y1"] = true;
+					}
+
+					// Calculate the second antinode position by extending the line forward
+					$x2 = $pos2[0] + $dx;
+					$y2 = $pos2[1] + $dy;
+
+					// Also make sure it's within the bounds of the map
+					if ( $x2 >= 0 && $x2 < strlen( $this->data[0] ) && $y2 >= 0 && $y2 < count( $this->data ) ) {
+						$antinodes["$x2,$y2"] = true;
+					}
+				}
+			}
+		}
+
+		// Return the total number of unique antinodes
+		return count( $antinodes );
 	}
 
 	/**
-	 * Part 2: SHORT_DESCRIPTION_HERE
+	 * Part 2: How many unique locations within the bounds of the map contain an antinode?
 	 *
 	 * @return int
 	 */
 	private function solve_part_2(): int {
-		// CODE HERE
-		return 0;
+		$antinodes = [];
+
+		// Process each frequency group
+		foreach ( $this->get_antennas_by_frequency() as $positions ) {
+			$count = count( $positions );
+
+			// Since all antennas are antinodes, add them all.
+			foreach ( $positions as $antenna ) {
+				$antinodes[ implode( ',', $antenna ) ] = true;
+			}
+
+			// Find all the points that line up with at least two antennas in a straight line
+			for ( $i = 0; $i < $count; $i ++ ) {
+				for ( $j = $i + 1; $j < $count; $j ++ ) {
+					$pos1 = $positions[ $i ];
+					$pos2 = $positions[ $j ];
+
+					// Figure out how far apart the two antennas are
+					$dx  = $pos2[0] - $pos1[0];
+					$dy  = $pos2[1] - $pos1[1];
+
+					// Find the greatest common divisor of the two distances to simplify the line
+					$gcd = gmp_intval( gmp_gcd( $dx, $dy ) );
+					$dx /= $gcd;
+					$dy /= $gcd;
+
+					// Extend the line in the forward direction (from pos1 to beyond pos2).
+					$x = $pos1[0];
+					$y = $pos1[1];
+					while ( true ) {
+						$x += $dx;
+						$y += $dy;
+
+						// Stop if we go out of bounds.
+						if ( $x < 0 || $y < 0 || $y >= count( $this->data ) || $x >= strlen( $this->data[0] ) ) {
+							break;
+						}
+
+						$antinodes[ "$x,$y" ] = true;
+					}
+
+					// Reset to the starting position
+					$x = $pos1[0];
+					$y = $pos1[1];
+
+					// Now extend the line in the backward direction (from pos1 to before pos2).
+					while ( true ) {
+						$x -= $dx;
+						$y -= $dy;
+
+						// Stop if we go out of bounds.
+						if ( $x < 0 || $y < 0 || $y >= count( $this->data ) || $x >= strlen( $this->data[0] ) ) {
+							break;
+						}
+
+						$antinodes[ "$x,$y" ] = true;
+					}
+				}
+			}
+		}
+
+		// Count unique antinodes
+		return count($antinodes);
+	}
+
+	/**
+	 * Parse the map and group antennas by frequency. ('A', '1', etc) and their positions.
+	 *
+	 * @return array
+	 */
+	private function get_antennas_by_frequency(): array {
+		$antennas = [];
+
+		foreach ( $this->data as $y => $line ) {
+			for ( $x = 0; $x < strlen( $line ); $x ++ ) {
+				$char = $line[ $x ];
+
+				// Check if it's alphanumeric.
+				if ( preg_match( '/^[a-zA-Z0-9]$/', $char ) ) {
+					$antennas[ $char ][] = [ $x, $y ];
+				}
+			}
+		}
+
+		return $antennas;
 	}
 
 	/**
@@ -96,12 +214,12 @@ function run_part( int $part, bool $test ): void {
 	// Define expected results for validation
 	$expected_values = [
 		1 => [
-			'test' => 0,
-			'real' => 0,
+			'test' => 14,
+			'real' => 369,
 		],
 		2 => [
-			'test' => 0,
-			'real' => 0,
+			'test' => 34,
+			'real' => 1169,
 		],
 	];
 
