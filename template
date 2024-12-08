@@ -97,18 +97,22 @@ function run_part( int $part, bool $test ): void {
 	$expected_values = [
 		1 => [
 			'test' => 0,
-			'real' => 123
+			'real' => 0,
 		],
 		2 => [
 			'test' => 0,
-			'real' => 456
+			'real' => 0,
 		],
 	];
 
+	// ANSI color codes
+	$yellow = "\033[33m"; // Yellow text
+	$reset  = "\033[0m";  // Reset text formatting
+
 	printf( PHP_EOL );
-	printf( 'Total:    %s' . PHP_EOL, $result );
-	printf( 'Expected: %s' . PHP_EOL, $test ? $expected_values[ $part ]['test'] : $expected_values[ $part ]['real'] );
-	printf( 'Time:     %s seconds' . PHP_EOL, round( $end - $start, 4 ) );
+	printf( $yellow . 'Answer:   ' . $reset . '%s' . PHP_EOL, $result );
+	printf( $yellow . 'Expected: ' . $reset . '%s' . PHP_EOL, $test ? $expected_values[ $part ]['test'] : $expected_values[ $part ]['real'] );
+	printf( $yellow . 'Time:     ' . $reset . '%s seconds' . PHP_EOL, round( $end - $start, 4 ) );
 }
 
 // Prompt for part and test mode
