@@ -80,9 +80,9 @@ class Day11 {
 	 *
 	 * Uses a cache to store results for each stone and remaining blinks.
 	 *
-	 * @param integer $stone The current stone.
+	 * @param integer $stone            The current stone.
 	 * @param integer $remaining_blinks The remaining number of blinks.
-	 * @param array $cache A cache of results.
+	 * @param array   $cache            A cache of results.
 	 *
 	 * @return int
 	 */
@@ -105,8 +105,7 @@ class Day11 {
 			$result = $this->count_stones( $left, $remaining_blinks - 1, $cache ) +
 					  $this->count_stones( $right, $remaining_blinks - 1, $cache );
 		} else {
-			$new_stone = $stone * 2024;
-			$result    = $this->count_stones( $new_stone, $remaining_blinks - 1, $cache );
+			$result    = $this->count_stones( $stone * 2024, $remaining_blinks - 1, $cache );
 		}
 
 		// Cache result and return it.
@@ -130,8 +129,8 @@ class Day11 {
 /**
  * Runs the specified part with the given settings and outputs results.
  *
- * @param int $part The part to run (1 or 2).
- * @param bool $test Whether to use test data.
+ * @param integer $part The part to run (1 or 2).
+ * @param bool    $test Whether to use test data.
  */
 function run_part( int $part, bool $test ): void {
 	$start  = microtime( true );
