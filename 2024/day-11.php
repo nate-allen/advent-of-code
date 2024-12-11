@@ -3,13 +3,13 @@
 namespace AdventOfCode\Year2024;
 
 /**
- * Day 11: TITLE HERE
+ * Day 11: Plutonian Pebbles
  */
 class Day11 {
 	/**
 	 * The puzzle part, 1 or 2.
 	 *
-	 * @var int
+	 * @var integer
 	 */
 	private int $part;
 
@@ -36,7 +36,7 @@ class Day11 {
 	/**
 	 * Executes the specified part of the puzzle.
 	 *
-	 * @return int
+	 * @return integer
 	 */
 	public function run(): int {
 		return match ( $this->part ) {
@@ -47,23 +47,70 @@ class Day11 {
 	}
 
 	/**
-	 * Part 1: SHORT_DESCRIPTION_HERE
+	 * Part 1: How many stones will you have after blinking 25 times?
 	 *
-	 * @return int
+	 * @return integer
 	 */
 	private function solve_part_1(): int {
-		// CODE HERE
-		return 0;
+		$total_stones = 0;
+		foreach ( $this->data as $stone ) {
+			$total_stones += $this->count_stones( $stone, 25 );
+		}
+
+		return $total_stones;
+	}
+
+
+	/**
+	 * Part 2: How many stones will you have after blinking 75 times?
+	 *
+	 * @return integer
+	 */
+	private function solve_part_2(): int {
+		$total_stones = 0;
+		foreach ( $this->data as $stone ) {
+			$total_stones += $this->count_stones( $stone, 75 );
+		}
+
+		return $total_stones;
 	}
 
 	/**
-	 * Part 2: SHORT_DESCRIPTION_HERE
+	 * Recursive method to count the total stones after a specific number of blinks.
+	 *
+	 * Uses a cache to store results for each stone and remaining blinks.
+	 *
+	 * @param integer $stone The current stone.
+	 * @param integer $remaining_blinks The remaining number of blinks.
+	 * @param array $cache A cache of results.
 	 *
 	 * @return int
 	 */
-	private function solve_part_2(): int {
-		// CODE HERE
-		return 0;
+	private function count_stones( int $stone, int $remaining_blinks, array &$cache = [] ): int {
+		if ( $remaining_blinks === 0 ) {
+			return 1;
+		}
+
+		// Check the cache first.
+		$cache_key = $stone . ',' . $remaining_blinks;
+		if ( isset( $cache[ $cache_key ] ) ) {
+			return $cache[ $cache_key ];
+		}
+
+		if ( $stone === 0 ) {
+			$result = $this->count_stones( 1, $remaining_blinks - 1, $cache );
+		} elseif ( strlen( $stone ) % 2 === 0 ) {
+			$left   = intval( substr( $stone, 0, strlen( $stone ) / 2 ) );
+			$right  = intval( substr( $stone, strlen( $stone ) / 2 ) );
+			$result = $this->count_stones( $left, $remaining_blinks - 1, $cache ) +
+					  $this->count_stones( $right, $remaining_blinks - 1, $cache );
+		} else {
+			$new_stone = $stone * 2024;
+			$result    = $this->count_stones( $new_stone, $remaining_blinks - 1, $cache );
+		}
+
+		// Cache result and return it.
+		return $cache[ $cache_key ] = $result;
 	}
 
 	/**
@@ -74,10 +121,9 @@ class Day11 {
 	 * @return array
 	 */
 	private function parse_data( bool $test ): array {
-		$file  = $test ? '/data/day-11-test.txt' : '/data/day-11.txt';
-		$lines = explode( "\n", trim( file_get_contents( __DIR__ . $file ) ) );
+		$file = $test ? '/data/day-11-test.txt' : '/data/day-11.txt';
 
-		return $lines;
+		return array_map( 'intval', explode( ' ', file_get_contents( __DIR__ . $file ) ) );
 	}
 }
 
@@ -96,12 +142,12 @@ function run_part( int $part, bool $test ): void {
 	// Define expected results for validation
 	$expected_values = [
 		1 => [
-			'test' => 0,
-			'real' => 0,
+			'test' => 55312,
+			'real' => 197357,
 		],
 		2 => [
-			'test' => 0,
-			'real' => 0,
+			'test' => 65601038650482,
+			'real' => 234568186890978,
 		],
 	];
 
