@@ -3,13 +3,13 @@
 namespace AdventOfCode\Year2024;
 
 /**
- * Day 10: TITLE HERE
+ * Day 10: Hoof It
  */
 class Day10 {
 	/**
 	 * The puzzle part, 1 or 2.
 	 *
-	 * @var int
+	 * @var integer
 	 */
 	private int $part;
 
@@ -27,16 +27,51 @@ class Day10 {
 	 */
 	private array $data;
 
+	/**
+	 * Movement directions (up, down, left, right).
+	 *
+	 * @var array
+	 */
+	private array $directions = [
+		[ - 1, 0 ],
+		[ 1, 0 ],
+		[ 0, - 1 ],
+		[ 0, 1 ],
+	];
+
+	/**
+	 * Number of rows in the map.
+	 *
+	 * @var integer
+	 */
+	private int $rows;
+
+	/**
+	 * Number of columns in the map.
+	 *
+	 * @var integer
+	 */
+	private int $cols;
+
+	/**
+	 * Cache to store the number of paths from a specific position.
+	 *
+	 * @var array
+	 */
+	private array $cache = [];
+
 	public function __construct( bool $test, int $part ) {
 		$this->part    = $part;
 		$this->is_test = $test;
 		$this->data    = $this->parse_data( $this->is_test );
+		$this->rows    = count( $this->data );
+		$this->cols    = count( $this->data[0] );
 	}
 
 	/**
 	 * Executes the specified part of the puzzle.
 	 *
-	 * @return int
+	 * @return integer
 	 */
 	public function run(): int {
 		return match ( $this->part ) {
@@ -47,24 +82,152 @@ class Day10 {
 	}
 
 	/**
-	 * Part 1: SHORT_DESCRIPTION_HERE
+	 * Part 1: Calculate the sum of the scores of all trailheads on the topographic map.
 	 *
-	 * @return int
+	 * @return integer
 	 */
 	private function solve_part_1(): int {
-		// CODE HERE
-		return 0;
+		$total_score = 0;
+
+		foreach ( $this->get_trailheads() as $trailhead ) {
+			$total_score += $this->count_reachable_nines( $trailhead[0], $trailhead[1], $this->data );
+		}
+
+		return $total_score;
+	}
+
+
+	/**
+	 * Part 2: Calculate the sum of the ratings of all trailheads on the topographic map.
+	 *
+	 * @return integer
+	 */
+	private function solve_part_2(): int {
+		$total_rating = 0;
+
+		foreach ( $this->get_trailheads() as $trailhead ) {
+			$total_rating += $this->count_paths( $trailhead[0], $trailhead[1], $this->data );
+		}
+
+		return $total_rating;
 	}
 
 	/**
-	 * Part 2: SHORT_DESCRIPTION_HERE
+	 * Counts paths from a specific position
+	 *
+	 * @param integer $x   Current row position
+	 * @param integer $y   Current column position
+	 * @param array   $map Topographic map
 	 *
 	 * @return int
 	 */
-	private function solve_part_2(): int {
-		// CODE HERE
-		return 0;
+	private function count_paths( int $x, int $y, array $map ): int {
+		// If the current position 9
+		if ( $map[ $x ][ $y ] === 9 ) {
+			return 1;
+		}
+
+		// Use cached result if it has been calculated before
+		if ( isset( $this->cache["$x,$y"] ) ) {
+			return $this->cache["$x,$y"];
+		}
+
+		$total_paths = 0;
+
+		foreach ( $this->directions as [$dx, $dy] ) {
+			$nx = $x + $dx;
+			$ny = $y + $dy;
+
+			// Skip if the position is out of bounds
+			if ( $nx < 0 || $nx >= $this->rows || $ny < 0 || $ny >= $this->cols ) {
+				continue;
+			}
+
+			// Skip if the hiking trail rule is invalid
+			if ( $map[ $nx ][ $ny ] !== $map[ $x ][ $y ] + 1 ) {
+				continue;
+			}
+
+			$total_paths += $this->count_paths( $nx, $ny, $map );
+		}
+
+		// Cache the result
+		$this->cache["$x,$y"] = $total_paths;
+
+		return $total_paths;
 	}
+
+	/**
+	 * Counts the number of reachable height 9 positions from a specific trailhead.
+	 *
+	 * @param int $startX Starting row position
+	 * @param int $startY Starting column position
+	 * @param array $map Topographic map
+	 *
+	 * @return int
+	 */
+	private function count_reachable_nines( int $startX, int $startY, array $map ): int {
+		$queue           = [ [ $startX, $startY ] ];
+		$visited         = [];
+		$reachable_nines = [];
+
+		while ( ! empty( $queue ) ) {
+			[ $x, $y ] = array_shift( $queue );
+
+			foreach ( $this->directions as [$dx, $dy] ) {
+				$nx = $x + $dx;
+				$ny = $y + $dy;
+
+				// Skip if the position is out of bounds
+				if ( $nx < 0 || $nx >= $this->rows || $ny < 0 || $ny >= $this->cols ) {
+					continue;
+				}
+
+				// Skip if already visited
+				if ( isset( $visited["$nx,$ny"] ) ) {
+					continue;
+				}
+
+				// Skip if the hiking trail rule is invalid
+				if ( $map[ $nx ][ $ny ] !== $map[ $x ][ $y ] + 1 ) {
+					continue;
+				}
+
+				// Mark position as visited
+				$visited["$nx,$ny"] = true;
+
+				// If we reach 9, add it to reachable positions
+				if ( $map[ $nx ][ $ny ] === 9 ) {
+					$reachable_nines["$nx,$ny"] = true;
+				}
+
+				// Add position to queue
+				$queue[] = [ $nx, $ny ];
+			}
+		}
+
+		return count( $reachable_nines );
+	}
+
+	/**
+	 * Helper function to get all positions with a height of 0.
+	 *
+	 * @return array
+	 */
+	private function get_trailheads(): array {
+		$trailheads = [];
+
+		for ( $row = 0; $row < $this->rows; $row ++ ) {
+			for ( $column = 0; $column < $this->cols; $column ++ ) {
+				if ( $this->data[ $row ][ $column ] === 0 ) {
+					$trailheads[] = [ $row, $column ];
+				}
+			}
+		}
+
+		return $trailheads;
+	}
+
 
 	/**
 	 * Parses the puzzle input data.
@@ -77,7 +240,7 @@ class Day10 {
 		$file  = $test ? '/data/day-10-test.txt' : '/data/day-10.txt';
 		$lines = explode( "\n", trim( file_get_contents( __DIR__ . $file ) ) );
 
-		return $lines;
+		return array_map( fn( $line ) => array_map( 'intval', str_split( trim( $line ) ) ), $lines );
 	}
 }
 
@@ -96,12 +259,12 @@ function run_part( int $part, bool $test ): void {
 	// Define expected results for validation
 	$expected_values = [
 		1 => [
-			'test' => 0,
-			'real' => 0,
+			'test' => 36,
+			'real' => 593,
 		],
 		2 => [
-			'test' => 0,
-			'real' => 0,
+			'test' => 81,
+			'real' => 1192,
 		],
 	];
 
