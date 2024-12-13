@@ -3,7 +3,7 @@
 namespace AdventOfCode\Year2024;
 
 /**
- * Day 13: TITLE HERE
+ * Day 13: Claw Contraption
  */
 class Day13 {
 	/**
@@ -40,30 +40,41 @@ class Day13 {
 	 */
 	public function run(): int {
 		return match ( $this->part ) {
-			1 => $this->solve_part_1(),
-			2 => $this->solve_part_2(),
+			1, 2 => $this->find_tokens(),
 			default => throw new \InvalidArgumentException( 'Invalid part specified.' ),
 		};
 	}
 
 	/**
-	 * Part 1: SHORT_DESCRIPTION_HERE
+	 * Uses linear algebra to find the number of tokens it takes to get a prize.
 	 *
 	 * @return int
 	 */
-	private function solve_part_1(): int {
-		// CODE HERE
-		return 0;
-	}
+	private function find_tokens(): int {
+		$total_tokens = 0;
 
-	/**
-	 * Part 2: SHORT_DESCRIPTION_HERE
-	 *
-	 * @return int
-	 */
-	private function solve_part_2(): int {
-		// CODE HERE
-		return 0;
+		foreach ( $this->data as $machine ) {
+			if ( 2 === $this->part ) {
+				$machine['P']['X'] += 10000000000000;
+				$machine['P']['Y'] += 10000000000000;
+			}
+
+			$a_x = $machine['A']['X'];
+			$a_y = $machine['A']['Y'];
+			$b_x = $machine['B']['X'];
+			$b_y = $machine['B']['Y'];
+			$p_x = $machine['P']['X'];
+			$p_y = $machine['P']['Y'];
+
+			$move_x = ( $b_y * $p_x - $b_x * $p_y ) / ( $b_y * $a_x - $b_x * $a_y );
+			$move_y = ( $a_x * $b_x * $p_y - $p_x * $b_x * $a_y ) / ( $b_x * ( $b_y * $a_x - $b_x * $a_y ) );
+
+			if ( is_int( $move_x ) && is_int( $move_y ) && $move_x >= 0 && $move_y >= 0 ) {
+				$total_tokens += 3 * $move_x + $move_y;
+			}
+		}
+
+		return $total_tokens;
 	}
 
 	/**
@@ -75,9 +86,23 @@ class Day13 {
 	 */
 	private function parse_data( bool $test ): array {
 		$file  = $test ? '/data/day-13-test.txt' : '/data/day-13.txt';
-		$lines = explode( "\n", trim( file_get_contents( __DIR__ . $file ) ) );
+		$lines = explode( PHP_EOL . PHP_EOL, trim( file_get_contents( __DIR__ . $file ) ) );
 
-		return $lines;
+		$data = [];
+		foreach ( $lines as $group ) {
+			$rows = explode( PHP_EOL, $group );
+			preg_match( '/X\+([\d]+), Y\+([\d]+)/', $rows[0], $matchesA );
+			preg_match( '/X\+([\d]+), Y\+([\d]+)/', $rows[1], $matchesB );
+			preg_match( '/X=([\d]+), Y=([\d]+)/', $rows[2], $matchesP );
+
+			$data[] = [
+				'A' => [ 'X' => intval( $matchesA[1] ), 'Y' => intval( $matchesA[2] ) ],
+				'B' => [ 'X' => intval( $matchesB[1] ), 'Y' => intval( $matchesB[2] ) ],
+				'P' => [ 'X' => intval( $matchesP[1] ), 'Y' => intval( $matchesP[2] ) ],
+			];
+		}
+
+		return $data;
 	}
 }
 
@@ -96,12 +121,12 @@ function run_part( int $part, bool $test ): void {
 	// Define expected results for validation
 	$expected_values = [
 		1 => [
-			'test' => 0,
-			'real' => 0,
+			'test' => 480,
+			'real' => 36758,
 		],
 		2 => [
-			'test' => 0,
-			'real' => 0,
+			'test' => 875318608908,
+			'real' => 76358113886726,
 		],
 	];
 
