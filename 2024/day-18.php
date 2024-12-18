@@ -45,7 +45,7 @@ class Day18 {
 	/**
 	 * Executes the specified part of the puzzle.
 	 *
-	 * @return int
+	 * @return int|string
 	 */
 	public function run(): int|string {
 		return match ( $this->part ) {
