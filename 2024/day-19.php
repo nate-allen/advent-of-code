@@ -92,8 +92,8 @@ class Day19 {
 	/**
 	 * Checks if a design can be formed using the available patterns.
 	 *
-	 * @param string $design The design to check.
-	 * @param array $patterns The available towel patterns.
+	 * @param string $design   The design to check.
+	 * @param array  $patterns The available towel patterns.
 	 *
 	 * @return bool
 	 */
@@ -123,8 +123,8 @@ class Day19 {
 	/**
 	 * Counts the number of ways a design can be formed using the available patterns.
 	 *
-	 * @param string $design The design to check.
-	 * @param array $patterns The available towel patterns.
+	 * @param string $design   The design to check.
+	 * @param array  $patterns The available towel patterns.
 	 *
 	 * @return int
 	 */
@@ -165,6 +165,8 @@ class Day19 {
 
 		$patterns = explode( ', ', $lines[0] );
 		$designs  = array_slice( $lines, 2 );
+
+		usort( $patterns, fn( $a, $b ) => strlen( $b ) <=> strlen( $a ) );
 
 		return [ $patterns, $designs ];
 	}
