@@ -201,10 +201,6 @@ class Day20 {
 	/**
 	 * Calculates distances from a starting point to all reachable positions in the grid.
 	 *
-	 * This method uses Breadth-First Search (BFS) to compute the number of steps
-	 * required to reach each position from the start. It optionally allows passing
-	 * through walls for a specified cutoff distance.
-	 *
 	 * @param array   $grid        The grid.
 	 * @param array   $start       The starting coordinates.
 	 * @param bool    $allow_walls Whether to allow passing through walls.
@@ -240,10 +236,6 @@ class Day20 {
 
 	/**
 	 * Retrieves all valid neighboring positions for a given grid cell.
-	 *
-	 * This method calculates the neighboring positions that are within bounds
-	 * of the grid. It optionally allows passing through walls ('#') based on
-	 * the $allow_walls parameter.
 	 *
 	 * @param array   $grid        The grid.
 	 * @param integer $x           The x of the current position.
