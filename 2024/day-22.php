@@ -55,21 +55,21 @@ class Day22 {
 		$total = 0;
 
 		// Iterate over each buyer's initial secret number.
-		foreach ( $this->data as $initialSecret ) {
-			$currentSecret = (int) $initialSecret;
+		foreach ( $this->data as $initial_secret ) {
+			$current_secret = (int) $initial_secret;
 
 			// Simulate the evolution of the secret number 2000 times.
 			for ( $iteration = 0; $iteration < 2000; $iteration ++ ) {
 				// Step 1: Multiply by 64, mix, prune.
-				$currentSecret = ( ( $currentSecret * 64 ) ^ $currentSecret ) % 16777216;
+				$current_secret = ( ( $current_secret * 64 ) ^ $current_secret ) % 16777216;
 				// Step 2: Divide by 32, mix, prune.
-				$currentSecret = ( intdiv( $currentSecret, 32 ) ^ $currentSecret ) % 16777216;
+				$current_secret = ( intdiv( $current_secret, 32 ) ^ $current_secret ) % 16777216;
 				// Step 3: Multiply by 2048, mix, prune.
-				$currentSecret = ( ( $currentSecret * 2048 ) ^ $currentSecret ) % 16777216;
+				$current_secret = ( ( $current_secret * 2048 ) ^ $current_secret ) % 16777216;
 			}
 
 			// Add the 2000th secret number to the total sum.
-			$total += $currentSecret;
+			$total += $current_secret;
 		}
 
 		return $total;
