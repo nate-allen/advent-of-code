@@ -1,0 +1,254 @@
+<?php
+
+namespace AdventOfCode\Year2019;
+
+/**
+ * Day 09: Sensor Boost
+ */
+class Day09 {
+	/**
+	 * The puzzle part, 1 or 2.
+	 *
+	 * @var integer
+	 */
+	private int $part;
+
+	/**
+	 * Whether to use the test data.
+	 *
+	 * @var bool
+	 */
+	private bool $is_test;
+
+	/**
+	 * Parsed data from the input file.
+	 *
+	 * @var array
+	 */
+	private array $data;
+
+	/**
+	 * The relative base for relative mode addressing.
+	 *
+	 * @var integer
+	 */
+	private int $relative_base = 0;
+
+	public function __construct( bool $test, int $part ) {
+		$this->part    = $part;
+		$this->is_test = $test;
+		$this->data    = $this->parse_data( $this->is_test );
+	}
+
+	/**
+	 * Executes the specified part of the puzzle.
+	 *
+	 * @return integer
+	 */
+	public function run(): int {
+		return match ( $this->part ) {
+			1 => $this->solve_part_1(),
+			2 => $this->solve_part_2(),
+			default => throw new \InvalidArgumentException( 'Invalid part specified.' ),
+		};
+	}
+
+	/**
+	 * Part 1: Extend the program by adding relative mode support, expandable memory, and support for large numbers.
+	 *
+	 * @return integer
+	 */
+	private function solve_part_1(): int {
+		return $this->run_program( 1 );
+	}
+
+	/**
+	 * Part 2: Run the program with input 2.
+	 *
+	 * @return integer
+	 */
+	private function solve_part_2(): int {
+		return $this->run_program( 2 );
+	}
+
+	/**
+	 * Runs the Intcode program with the given input.
+	 *
+	 * @param int $input The input value to use when an opcode 3 is encountered.
+	 *
+	 * @return int
+	 */
+	private function run_program( int $input ): int {
+		$memory  = $this->data;
+		$pointer = 0;
+		$outputs = [];
+
+		// Increase memory size
+		$memory = array_pad( $memory, 10000, 0 );
+
+		while ( true ) {
+			$instruction = $memory[ $pointer ];
+			$opcode      = $instruction % 100;
+			$mode1       = intdiv( $instruction, 100 ) % 10;
+			$mode2       = intdiv( $instruction, 1000 ) % 10;
+			$mode3       = intdiv( $instruction, 10000 ) % 10;
+
+			if ( $opcode === 99 ) {
+				break;
+			}
+
+			switch ( $opcode ) {
+				case 1: // Addition
+					$val1 = $this->get_value( $memory, $pointer + 1, $mode1 );
+					$val2 = $this->get_value( $memory, $pointer + 2, $mode2 );
+					$this->write_value( $memory, $pointer + 3, $mode3, $val1 + $val2 );
+					$pointer += 4;
+					break;
+
+				case 2: // Multiplication
+					$val1 = $this->get_value( $memory, $pointer + 1, $mode1 );
+					$val2 = $this->get_value( $memory, $pointer + 2, $mode2 );
+					$this->write_value( $memory, $pointer + 3, $mode3, $val1 * $val2 );
+					$pointer += 4;
+					break;
+
+				case 3: // Input
+					$this->write_value( $memory, $pointer + 1, $mode1, $input );
+					$pointer += 2;
+					break;
+
+				case 4: // Output
+					$output    = $this->get_value( $memory, $pointer + 1, $mode1 );
+					$outputs[] = $output;
+					$pointer   += 2;
+					break;
+
+				case 5: // Jump-if-true
+					$val1    = $this->get_value( $memory, $pointer + 1, $mode1 );
+					$val2    = $this->get_value( $memory, $pointer + 2, $mode2 );
+					$pointer = ( $val1 !== 0 ) ? $val2 : $pointer + 3;
+					break;
+
+				case 6: // Jump-if-false
+					$val1    = $this->get_value( $memory, $pointer + 1, $mode1 );
+					$val2    = $this->get_value( $memory, $pointer + 2, $mode2 );
+					$pointer = ( $val1 === 0 ) ? $val2 : $pointer + 3;
+					break;
+
+				case 7: // Less than
+					$val1 = $this->get_value( $memory, $pointer + 1, $mode1 );
+					$val2 = $this->get_value( $memory, $pointer + 2, $mode2 );
+					$this->write_value( $memory, $pointer + 3, $mode3, ( $val1 < $val2 ) ? 1 : 0 );
+					$pointer += 4;
+					break;
+
+				case 8: // Equals
+					$val1 = $this->get_value( $memory, $pointer + 1, $mode1 );
+					$val2 = $this->get_value( $memory, $pointer + 2, $mode2 );
+					$this->write_value( $memory, $pointer + 3, $mode3, ( $val1 === $val2 ) ? 1 : 0 );
+					$pointer += 4;
+					break;
+
+				case 9: // Adjust relative base
+					$this->relative_base += $this->get_value( $memory, $pointer + 1, $mode1 );
+					$pointer             += 2;
+					break;
+			}
+		}
+
+		return end( $outputs ) ?: 0;
+	}
+
+	/**
+	 * Retrieves a value based on the parameter mode.
+	 */
+	private function get_value(array &$memory, int $position, int $mode): int {
+		$param = $memory[$position] ?? 0;
+		return match ($mode) {
+			0 => $memory[$param] ?? 0,                          // Position mode
+			1 => $param,                                       // Immediate mode
+			2 => $memory[$this->relative_base + $param] ?? 0, // Relative mode
+			default => throw new \RuntimeException("Invalid mode: $mode"),
+		};
+	}
+
+	/**
+	 * Writes a value to the appropriate memory address based on the parameter mode.
+	 */
+	private function write_value(array &$memory, int $position, int $mode, int $value): void {
+		$param = $memory[$position] ?? 0;
+		$address = match ($mode) {
+			0 => $param,
+			2 => $this->relative_base + $param,
+			default => throw new \RuntimeException("Invalid mode for write: $mode"),
+		};
+
+		$memory[$address] = $value;
+	}
+
+	/**
+	 * Parses the puzzle input data.
+	 *
+	 * @param bool $test Whether test data should be used.
+	 *
+	 * @return array
+	 */
+	private function parse_data( bool $test ): array {
+		$file  = $test ? '/data/day-09-test.txt' : '/data/day-09.txt';
+
+		return array_map( 'intval', explode( ",", trim( file_get_contents( __DIR__ . $file ) ) ) );
+	}
+}
+
+/**
+ * Runs the specified part with the given settings and outputs results.
+ *
+ * @param integer $part The part to run (1 or 2).
+ * @param bool    $test Whether to use test data.
+ */
+function run_part( int $part, bool $test ): void {
+	$start  = microtime( true );
+	$day09  = new Day09( $test, $part );
+	$result = $day09->run();
+	$end    = microtime( true );
+
+	// Define expected results for validation
+	$expected_values = [
+		1 => [
+			'test' => 13818007,
+			'real' => 2752191671,
+		],
+		2 => [
+			'test' => 13818007,
+			'real' => 87571,
+		],
+	];
+
+	// ANSI color codes
+	$yellow = "\033[33m"; // Yellow text
+	$reset  = "\033[0m";  // Reset text formatting
+
+	printf( PHP_EOL );
+	printf( $yellow . 'Answer:   ' . $reset . '%s' . PHP_EOL, $result );
+	printf( $yellow . 'Expected: ' . $reset . '%s' . PHP_EOL, $test ? $expected_values[ $part ]['test'] : $expected_values[ $part ]['real'] );
+	printf( $yellow . 'Time:     ' . $reset . '%s seconds' . PHP_EOL, round( $end - $start, 4 ) );
+}
+
+// Prompt for part and test mode
+while ( true ) {
+	$part = (int) trim( readline( 'Which part do you want to run? (1/2): ' ) );
+	if ( ! in_array( $part, [ 1, 2 ], true ) ) {
+		echo 'Invalid part. Please enter 1 or 2.' . PHP_EOL;
+		continue;
+	}
+
+	while ( true ) {
+		$test = strtolower( trim( readline( 'Do you want to run the test? (y/n): ' ) ) );
+		if ( in_array( $test, [ 'y', 'n' ], true ) ) {
+			$test_mode = $test === 'y';
+			run_part( $part, $test_mode );
+			break 2;
+		}
+		echo 'Invalid input. Please enter y or n.' . PHP_EOL;
+	}
+}
