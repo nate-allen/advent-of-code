@@ -2,6 +2,8 @@
 
 namespace AdventOfCode\Year2019;
 
+include_once 'lib/IntcodeComputer.php';
+
 /**
  * Day 09: Sensor Boost
  */
@@ -79,84 +81,18 @@ class Day09 {
 	 * @return int
 	 */
 	private function run_program( int $input ): int {
-		$memory  = $this->data;
-		$pointer = 0;
-		$outputs = [];
+		$computer = new IntcodeComputer($this->data);
+		$computer->add_input($input);
 
-		// Increase memory size
-		$memory = array_pad( $memory, 10000, 0 );
-
-		while ( true ) {
-			$instruction = $memory[ $pointer ];
-			$opcode      = $instruction % 100;
-			$mode1       = intdiv( $instruction, 100 ) % 10;
-			$mode2       = intdiv( $instruction, 1000 ) % 10;
-			$mode3       = intdiv( $instruction, 10000 ) % 10;
-
-			if ( $opcode === 99 ) {
-				break;
-			}
-
-			switch ( $opcode ) {
-				case 1: // Addition
-					$val1 = $this->get_value( $memory, $pointer + 1, $mode1 );
-					$val2 = $this->get_value( $memory, $pointer + 2, $mode2 );
-					$this->write_value( $memory, $pointer + 3, $mode3, $val1 + $val2 );
-					$pointer += 4;
-					break;
-
-				case 2: // Multiplication
-					$val1 = $this->get_value( $memory, $pointer + 1, $mode1 );
-					$val2 = $this->get_value( $memory, $pointer + 2, $mode2 );
-					$this->write_value( $memory, $pointer + 3, $mode3, $val1 * $val2 );
-					$pointer += 4;
-					break;
-
-				case 3: // Input
-					$this->write_value( $memory, $pointer + 1, $mode1, $input );
-					$pointer += 2;
-					break;
-
-				case 4: // Output
-					$output    = $this->get_value( $memory, $pointer + 1, $mode1 );
-					$outputs[] = $output;
-					$pointer   += 2;
-					break;
-
-				case 5: // Jump-if-true
-					$val1    = $this->get_value( $memory, $pointer + 1, $mode1 );
-					$val2    = $this->get_value( $memory, $pointer + 2, $mode2 );
-					$pointer = ( $val1 !== 0 ) ? $val2 : $pointer + 3;
-					break;
-
-				case 6: // Jump-if-false
-					$val1    = $this->get_value( $memory, $pointer + 1, $mode1 );
-					$val2    = $this->get_value( $memory, $pointer + 2, $mode2 );
-					$pointer = ( $val1 === 0 ) ? $val2 : $pointer + 3;
-					break;
-
-				case 7: // Less than
-					$val1 = $this->get_value( $memory, $pointer + 1, $mode1 );
-					$val2 = $this->get_value( $memory, $pointer + 2, $mode2 );
-					$this->write_value( $memory, $pointer + 3, $mode3, ( $val1 < $val2 ) ? 1 : 0 );
-					$pointer += 4;
-					break;
-
-				case 8: // Equals
-					$val1 = $this->get_value( $memory, $pointer + 1, $mode1 );
-					$val2 = $this->get_value( $memory, $pointer + 2, $mode2 );
-					$this->write_value( $memory, $pointer + 3, $mode3, ( $val1 === $val2 ) ? 1 : 0 );
-					$pointer += 4;
-					break;
-
-				case 9: // Adjust relative base
-					$this->relative_base += $this->get_value( $memory, $pointer + 1, $mode1 );
-					$pointer             += 2;
-					break;
+		$last_output = null;
+		while (!$computer->has_halted()) {
+			$output = $computer->run_until_output();
+			if ($output !== null) {
+				$last_output = $output;
 			}
 		}
 
-		return end( $outputs ) ?: 0;
+		return $last_output ?? 0;
 	}
 
 	/**
