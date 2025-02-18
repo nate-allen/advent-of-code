@@ -2,6 +2,8 @@
 
 namespace AdventOfCode\Year2019;
 
+include_once 'lib/IntcodeComputer.php';
+
 /**
  * Day 02: 1202 Program Alarm
  */
@@ -58,27 +60,13 @@ class Day02 {
 		$memory[1] = 12;
 		$memory[2] = 2;
 
-		// Execute program
-		$position = 0;
-		while ( $memory[ $position ] !== 99 ) {
-			$opcode = $memory[ $position ];
-
-			$param1     = $memory[ $memory[ $position + 1 ] ] ?? 0;
-			$param2     = $memory[ $memory[ $position + 2 ] ] ?? 0;
-			$output_pos = $memory[ $position + 3 ] ?? 0;
-
-			if ( $opcode === 1 ) {
-				$memory[ $output_pos ] = $param1 + $param2;
-			} elseif ( $opcode === 2 ) {
-				$memory[ $output_pos ] = $param1 * $param2;
-			}
-
-			// Move to the next instruction
-			$position += 4;
+		// Run the program
+		$computer = new IntcodeComputer( $memory );
+		while ( ! $computer->has_halted() ) {
+			$computer->run_until_output();
 		}
 
-		// Return the value at position 0
-		return $memory[0];
+		return $computer->get_memory( 0 );
 	}
 
 	/**
@@ -93,30 +81,19 @@ class Day02 {
 		// Try every combination of noun and verb (each from 0 to 99).
 		for ( $noun = 0; $noun <= 99; $noun ++ ) {
 			for ( $verb = 0; $verb <= 99; $verb ++ ) {
-				// Start with a fresh copy of the original memory for each attempt.
+				// Start with a fresh copy of the original memory
 				$memory    = $original;
 				$memory[1] = $noun;
 				$memory[2] = $verb;
 
-				$position = 0;
-				while ( $memory[ $position ] !== 99 ) {
-					$opcode = $memory[ $position ];
-
-					$param1     = $memory[ $memory[ $position + 1 ] ] ?? 0;
-					$param2     = $memory[ $memory[ $position + 2 ] ] ?? 0;
-					$output_pos = $memory[ $position + 3 ] ?? 0;
-
-					if ( $opcode === 1 ) {
-						$memory[ $output_pos ] = $param1 + $param2;
-					} elseif ( $opcode === 2 ) {
-						$memory[ $output_pos ] = $param1 * $param2;
-					}
-
-					$position += 4;
+				// Run the program
+				$computer = new IntcodeComputer( $memory );
+				while ( ! $computer->has_halted() ) {
+					$computer->run_until_output();
 				}
 
 				// Check if the result matches the target output.
-				if ( $memory[0] === $target ) {
+				if ( $computer->get_memory( 0 ) === $target ) {
 					return 100 * $noun + $verb;
 				}
 			}

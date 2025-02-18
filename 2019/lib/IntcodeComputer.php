@@ -127,6 +127,17 @@ class IntcodeComputer {
 	}
 
 	/**
+	 * Retrieves the value stored at a specific memory address.
+	 *
+	 * @param int $address The memory address to fetch.
+	 *
+	 * @return int
+	 */
+	public function get_memory( int $address ): int {
+		return $this->memory[ $address ] ?? 0;
+	}
+
+	/**
 	 * Retrieves a value based on the parameter mode.
 	 *
 	 * @param int        $offset The parameter offset.
