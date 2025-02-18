@@ -2,6 +2,8 @@
 
 namespace AdventOfCode\Year2019;
 
+include_once 'lib/IntcodeComputer.php';
+
 /**
  * Day 05: Sunny with a Chance of Asteroids
  */
@@ -72,102 +74,18 @@ class Day05 {
 	 * @return int
 	 */
 	private function run_program( int $input ): int {
-		$data    = $this->data;
-		$pointer = 0;
-		$outputs = [];
+		$computer = new IntcodeComputer( $this->data );
+		$computer->add_input( $input );
 
-		while ( true ) {
-			$instruction = $data[ $pointer ];
-			$opcode      = $instruction % 100;
-			$mode1       = intdiv( $instruction, 100 ) % 10;
-			$mode2       = intdiv( $instruction, 1000 ) % 10;
-
-			if ( $opcode === 99 ) {
-				break;
-			}
-
-			switch ( $opcode ) {
-				case 1:
-					// Addition.
-					$param1          = $data[ $pointer + 1 ];
-					$param2          = $data[ $pointer + 2 ];
-					$param3          = $data[ $pointer + 3 ];
-					$val1            = ( $mode1 === 0 ) ? $data[ $param1 ] : $param1;
-					$val2            = ( $mode2 === 0 ) ? $data[ $param2 ] : $param2;
-					$data[ $param3 ] = $val1 + $val2;
-					$pointer         += 4;
-					break;
-
-				case 2:
-					// Multiplication.
-					$param1          = $data[ $pointer + 1 ];
-					$param2          = $data[ $pointer + 2 ];
-					$param3          = $data[ $pointer + 3 ];
-					$val1            = ( $mode1 === 0 ) ? $data[ $param1 ] : $param1;
-					$val2            = ( $mode2 === 0 ) ? $data[ $param2 ] : $param2;
-					$data[ $param3 ] = $val1 * $val2;
-					$pointer         += 4;
-					break;
-
-				case 3:
-					// Input.
-					$param1          = $data[ $pointer + 1 ];
-					$data[ $param1 ] = $input;
-					$pointer         += 2;
-					break;
-
-				case 4:
-					// Output.
-					$param1    = $data[ $pointer + 1 ];
-					$val       = ( $mode1 === 0 ) ? $data[ $param1 ] : $param1;
-					$outputs[] = $val;
-					$pointer   += 2;
-					break;
-
-				case 5:
-					// Jump-if-true.
-					$param1  = $data[ $pointer + 1 ];
-					$param2  = $data[ $pointer + 2 ];
-					$val1    = ( $mode1 === 0 ) ? $data[ $param1 ] : $param1;
-					$val2    = ( $mode2 === 0 ) ? $data[ $param2 ] : $param2;
-					$pointer = ( $val1 !== 0 ) ? $val2 : $pointer + 3;
-					break;
-
-				case 6:
-					// Jump-if-false.
-					$param1  = $data[ $pointer + 1 ];
-					$param2  = $data[ $pointer + 2 ];
-					$val1    = ( $mode1 === 0 ) ? $data[ $param1 ] : $param1;
-					$val2    = ( $mode2 === 0 ) ? $data[ $param2 ] : $param2;
-					$pointer = ( $val1 === 0 ) ? $val2 : $pointer + 3;
-					break;
-
-				case 7:
-					// Less than.
-					$param1          = $data[ $pointer + 1 ];
-					$param2          = $data[ $pointer + 2 ];
-					$param3          = $data[ $pointer + 3 ];
-					$val1            = ( $mode1 === 0 ) ? $data[ $param1 ] : $param1;
-					$val2            = ( $mode2 === 0 ) ? $data[ $param2 ] : $param2;
-					$data[ $param3 ] = ( $val1 < $val2 ) ? 1 : 0;
-					$pointer         += 4;
-					break;
-
-				case 8:
-					// Equals.
-					$param1          = $data[ $pointer + 1 ];
-					$param2          = $data[ $pointer + 2 ];
-					$param3          = $data[ $pointer + 3 ];
-					$val1            = ( $mode1 === 0 ) ? $data[ $param1 ] : $param1;
-					$val2            = ( $mode2 === 0 ) ? $data[ $param2 ] : $param2;
-					$data[ $param3 ] = ( $val1 == $val2 ) ? 1 : 0;
-					$pointer         += 4;
-					break;
+		$last_output = null;
+		while ( ! $computer->has_halted() ) {
+			$output = $computer->run_until_output();
+			if ( $output !== null ) {
+				$last_output = $output;
 			}
 		}
 
-		// Return the final diagnostic code (the last output).
-		return end( $outputs );
+		return $last_output ?? 0;
 	}
 
 	/**
