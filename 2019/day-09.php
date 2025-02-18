@@ -96,33 +96,6 @@ class Day09 {
 	}
 
 	/**
-	 * Retrieves a value based on the parameter mode.
-	 */
-	private function get_value(array &$memory, int $position, int $mode): int {
-		$param = $memory[$position] ?? 0;
-		return match ($mode) {
-			0 => $memory[$param] ?? 0,                          // Position mode
-			1 => $param,                                       // Immediate mode
-			2 => $memory[$this->relative_base + $param] ?? 0, // Relative mode
-			default => throw new \RuntimeException("Invalid mode: $mode"),
-		};
-	}
-
-	/**
-	 * Writes a value to the appropriate memory address based on the parameter mode.
-	 */
-	private function write_value(array &$memory, int $position, int $mode, int $value): void {
-		$param = $memory[$position] ?? 0;
-		$address = match ($mode) {
-			0 => $param,
-			2 => $this->relative_base + $param,
-			default => throw new \RuntimeException("Invalid mode for write: $mode"),
-		};
-
-		$memory[$address] = $value;
-	}
-
-	/**
 	 * Parses the puzzle input data.
 	 *
 	 * @param bool $test Whether test data should be used.

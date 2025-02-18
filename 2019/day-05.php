@@ -97,9 +97,8 @@ class Day05 {
 	 */
 	private function parse_data( bool $test ): array {
 		$file  = $test ? '/data/day-05-test.txt' : '/data/day-05.txt';
-		$lines = array_map( 'intval', explode( ",", trim( file_get_contents( __DIR__ . $file ) ) ) );
 
-		return $lines;
+		return array_map( 'intval', explode( ",", trim( file_get_contents( __DIR__ . $file ) ) ) );
 	}
 }
 
