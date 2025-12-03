@@ -105,12 +105,6 @@ class Day03 {
 				$stack[] = $digit;
 			}
 
-			// If we still need to drop more, remove from the end
-			while ( $drops_remaining > 0 ) {
-				array_pop( $stack );
-				$drops_remaining--;
-			}
-
 			// Take first 12 digits to form the joltage
 			$joltage = (int) implode( '', array_slice( $stack, 0, $batteries_keep ) );
 			$total  += $joltage;
