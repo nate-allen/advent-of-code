@@ -55,18 +55,7 @@ class Day08 {
 		$boxes = $this->data;
 		$n     = count( $boxes );
 		$limit = $this->is_test ? 10 : 1000;
-		$heap  = new \SplMinHeap();
-
-		for ( $i = 0; $i < $n; $i++ ) {
-			for ( $j = $i + 1; $j < $n; $j++ ) {
-				$dx       = $boxes[ $i ][0] - $boxes[ $j ][0];
-				$dy       = $boxes[ $i ][1] - $boxes[ $j ][1];
-				$dz       = $boxes[ $i ][2] - $boxes[ $j ][2];
-				$distance = $dx * $dx + $dy * $dy + $dz * $dz;
-
-				$heap->insert( [$distance, $i, $j] );
-			}
-		}
+		$heap  = $this->generate_pairs( $boxes );
 
 		$parent = range( 0, $n - 1 );
 		$size   = array_fill( 0, $n, 1 );
@@ -96,18 +85,7 @@ class Day08 {
 	private function solve_part_2(): int {
 		$boxes = $this->data;
 		$n     = count( $boxes );
-		$heap  = new \SplMinHeap();
-
-		for ( $i = 0; $i < $n; $i++ ) {
-			for ( $j = $i + 1; $j < $n; $j++ ) {
-				$dx           = $boxes[ $i ][0] - $boxes[ $j ][0];
-				$dy           = $boxes[ $i ][1] - $boxes[ $j ][1];
-				$dz           = $boxes[ $i ][2] - $boxes[ $j ][2];
-				$dist_squared = $dx * $dx + $dy * $dy + $dz * $dz;
-
-				$heap->insert( [$dist_squared, $i, $j] );
-			}
-		}
+		$heap  = $this->generate_pairs( $boxes );
 
 		$parent = range( 0, $n - 1 );
 		$size   = array_fill( 0, $n, 1 );
@@ -117,13 +95,10 @@ class Day08 {
 			$i    = $pair[1];
 			$j    = $pair[2];
 
-			$merged = $this->merge_circuits( $i, $j, $parent, $size );
+			$final_root = $this->merge_circuits( $i, $j, $parent, $size );
 
-			if ( $merged ) {
-				$final_root = $this->find( $i, $parent );
-				if ( $size[ $final_root ] === $n ) {
-					return $boxes[ $i ][0] * $boxes[ $j ][0];
-				}
+			if ( $final_root !== null && $size[ $final_root ] === $n ) {
+				return $boxes[ $i ][0] * $boxes[ $j ][0];
 			}
 		}
 
@@ -171,21 +146,46 @@ class Day08 {
 	}
 
 	/**
-	 * Merges two circuits
+	 * Generates all pairs of junction boxes with their squared distances, sorted in a min-heap.
+	 *
+	 * @param array $boxes Array of junction box coordinates [x, y, z].
+	 *
+	 * @return \SplMinHeap Heap containing pairs as [distance, i, j].
+	 */
+	private function generate_pairs( array $boxes ): \SplMinHeap {
+		$n    = count( $boxes );
+		$heap = new \SplMinHeap();
+
+		for ( $i = 0; $i < $n; $i++ ) {
+			for ( $j = $i + 1; $j < $n; $j++ ) {
+				$dx       = $boxes[ $i ][0] - $boxes[ $j ][0];
+				$dy       = $boxes[ $i ][1] - $boxes[ $j ][1];
+				$dz       = $boxes[ $i ][2] - $boxes[ $j ][2];
+				$distance = $dx * $dx + $dy * $dy + $dz * $dz;
+
+				$heap->insert( [$distance, $i, $j] );
+			}
+		}
+
+		return $heap;
+	}
+
+	/**
+	 * Merges two circuits and returns the final root.
 	 *
 	 * @param int   $a      First node.
 	 * @param int   $b      Second node.
 	 * @param array $parent Reference to the parent array.
 	 * @param array $size   Reference to the size array.
 	 *
-	 * @return bool True if the sets were merged, false if they were already in the same set.
+	 * @return int|null The final root if merged, null if already in the same set.
 	 */
-	private function merge_circuits( int $a, int $b, array &$parent, array &$size ): bool {
+	private function merge_circuits( int $a, int $b, array &$parent, array &$size ): ?int {
 		$root_a = $this->find( $a, $parent );
 		$root_b = $this->find( $b, $parent );
 
 		if ( $root_a === $root_b ) {
-			return false;
+			return null;
 		}
 
 		if ( $size[ $root_a ] < $size[ $root_b ] ) {
@@ -197,7 +197,7 @@ class Day08 {
 		$parent[ $root_b ] = $root_a;
 		$size[ $root_a ]  += $size[ $root_b ];
 
-		return true;
+		return $root_a;
 	}
 }
 
