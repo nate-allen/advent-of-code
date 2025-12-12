@@ -39,8 +39,6 @@ class Day12B {
 	/**
 	 * Part 1: Count how many regions can fit all their required presents.
 	 *
-	 * Uses area check first (for real data), then backtracking/DFS for verification.
-	 *
 	 * @return integer
 	 */
 	private function solve_part_1(): int {
