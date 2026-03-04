@@ -1,0 +1,6 @@
+#ip 1
+seti 5 0 2
+seti 0 0 0
+eqrr 2 0 3
+addr 3 1 1
+seti 3 0 1
