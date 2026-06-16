@@ -1,0 +1,5 @@
+set b 3
+set c b
+mul b 2
+mul b 2
+sub b -1
